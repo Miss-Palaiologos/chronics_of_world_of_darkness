@@ -18,25 +18,25 @@
       },
       "variants": [
         {
-          "when": "秩序 ≤ 5",
+          "when": "正当性 ≤ 5",
           "kind": "场景",
           "text": "守夜的人比原计划多了一倍——因为前三天已经有别的街区开始有人坐着了。这件事没有人组织。",
-          "meaning": "政府控制正在减弱，群众开始自行聚集。",
-          "scene_effect": "守夜人数翻倍，但没有人明确组织这件事。",
+          "meaning": "公众对制度的信任下降，人群开始自行聚集。",
+          "scene_effect": "守夜人数翻倍，但没有明确组织者。",
           "player_effects": [
             {
               "behavior": "穿过人群并隐藏身份",
-              "modifier": "Dexterity + Stealth 难度 +1",
+              "modifier": "敏捷 + 潜行 难度 +1",
               "why": "密集人群既遮挡视线，也增加被记住的机会"
             },
             {
               "behavior": "在人群中狩猎",
-              "modifier": "Wits + Streetwise 难度 −1",
+              "modifier": "机智 + 街头 难度 −1",
               "why": "情绪和血液密度提高，但目击风险上升"
             },
             {
               "behavior": "劝散守夜人群",
-              "modifier": "Charisma + Leadership 难度 +2",
+              "modifier": "魅力 + 领导 难度 +2",
               "why": "人群不是在等命令，而是在等一个说法"
             }
           ]
@@ -50,12 +50,12 @@
           "player_effects": [
             {
               "behavior": "识别街垒成员",
-              "modifier": "Wits + Awareness 难度 −1",
+              "modifier": "机智 + 警觉 难度 −1",
               "why": "熟悉运动圈的人能看出他们的姿态"
             },
             {
               "behavior": "从他们口中问出真实立场",
-              "modifier": "Manipulation + Insight 难度 +1",
+              "modifier": "操控 + 洞察 难度 +1",
               "why": "他们不愿意在公开场合暴露自己"
             },
             {
@@ -74,17 +74,17 @@
           "player_effects": [
             {
               "behavior": "寻找猎物",
-              "modifier": "Wits + Streetwise 难度 −1",
+              "modifier": "机智 + 街头 难度 −1",
               "why": "人群情绪浓、遮掩多，狩猎条件极好"
             },
             {
               "behavior": "争夺同一猎物",
-              "modifier": "Manipulation 或 Strength + Intimidation 难度 +1",
+              "modifier": "操控 或 力量 + 威吓 难度 +1",
               "why": "在场者不愿放弃已经选定的目标"
             },
             {
               "behavior": "抵抗饥渴或愤怒狂乱",
-              "modifier": "Resolve + Composure 难度 +1",
+              "modifier": "决心 + 沉着 难度 +1",
               "why": "竞争和血腥味同时提高失控风险"
             }
           ]
@@ -386,12 +386,12 @@
           "player_effects": [
             {
               "behavior": "控制旁听席或压住记者",
-              "modifier": "Charisma + Leadership 难度 +2",
+              "modifier": "魅力 + Leadership 难度 +2",
               "why": "所有人都知道自己正在被围观"
             },
             {
               "behavior": "利用程序漏洞",
-              "modifier": "Politics + Academics（Law）难度 −1",
+              "modifier": "政治 + 学术（法律）难度 −1",
               "why": "制度越紧张，程序缝隙越明显"
             },
             {
@@ -410,12 +410,12 @@
           "player_effects": [
             {
               "behavior": "用钱或关系影响机构",
-              "modifier": "Resources 或 Influence 难度 +1",
+              "modifier": "资源 或 影响力 难度 +1",
               "why": "机构正在收紧风险敞口"
             },
             {
               "behavior": "把问题拖延成程序问题",
-              "modifier": "Politics + Academics（Law）难度 −1",
+              "modifier": "政治 + 学术（法律）难度 −1",
               "why": "制度越僵硬，程序拖延越有效"
             },
             {
@@ -434,12 +434,12 @@
           "player_effects": [
             {
               "behavior": "掩盖档案中的血族部分",
-              "modifier": "Manipulation + Subterfuge 难度 +1",
+              "modifier": "操控 + 欺骗 难度 +1",
               "why": "提问者已经开始追踪文件结构"
             },
             {
               "behavior": "引导记者继续追查",
-              "modifier": "Manipulation + Subterfuge 难度 −1，暴露度 +1",
+              "modifier": "操控 + 欺骗 难度 −1，暴露度 +1",
               "why": "让她继续查会带来曝光，也会带来真相"
             },
             {

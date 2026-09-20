@@ -2,7 +2,7 @@
   "meta": {
     "title": "不在册者",
     "subtitle": "2040 · 新加坡 · 现代之夜",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "time_base": "T0 = 林伟健死亡之夜",
     "session_note": "每一幕 = 一次极乐境幕间 + 一个标志事件。六幕、八个场景。人类立场按阶段固定；血族立场动态可变。",
     "source_of_truth": "本文件与 data/kindred.json、data/mortal.json、data/props.json、data/acts/ 是全部数值的唯一来源。docs/acts/*.md、docs/roster.md 与 docs/dashboard.html 由 `python -m the_unlisted.cli render` 生成。"

@@ -26,7 +26,7 @@
           "player_effects": [
             {
               "behavior": "控制两支队伍的节奏",
-              "modifier": "Charisma + Leadership 难度 +2",
+              "modifier": "魅力 + Leadership 难度 +2",
               "why": "两边都在争夺同一场游行的解释权"
             },
             {
@@ -36,7 +36,7 @@
             },
             {
               "behavior": "混在队伍里隐藏身份",
-              "modifier": "Dexterity + Stealth 难度 −1",
+              "modifier": "敏捷 + 潜行 难度 −1",
               "why": "人群越杂，越难分辨谁属于哪一方"
             }
           ]
@@ -50,12 +50,12 @@
           "player_effects": [
             {
               "behavior": "绕过防线或接近讲台",
-              "modifier": "Dexterity + Stealth 难度 +1",
+              "modifier": "敏捷 + 潜行 难度 +1",
               "why": "警力提前部署，但没有能力清场"
             },
             {
               "behavior": "预判警方行动",
-              "modifier": "Wits + Awareness 或 Politics 难度 −1",
+              "modifier": "机智 + 警觉 或 政治 难度 −1",
               "why": "部署越早，行动规律越容易读"
             },
             {
@@ -74,12 +74,12 @@
           "player_effects": [
             {
               "behavior": "干扰无人机",
-              "modifier": "Dexterity + Technology 难度 +1",
+              "modifier": "敏捷 + 科技 难度 +1",
               "why": "现场设备有备份，失败会留下更多记录"
             },
             {
               "behavior": "隐藏身份",
-              "modifier": "Dexterity + Stealth 难度 +1",
+              "modifier": "敏捷 + 潜行 难度 +1",
               "why": "镜头已经锁定异常行为"
             },
             {

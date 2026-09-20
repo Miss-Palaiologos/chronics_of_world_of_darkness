@@ -1,5 +1,23 @@
 # Changelog / 版本记录
 
+## [1.0.3] - 2026-09-20
+
+### English
+
+- Localized all V5 skill and background references in variant effects into Chinese.
+- Corrected variant logic so each variable maps to an appropriate scene consequence.
+- Changed the 5.1 high-exposure variant to represent Second Inquisition observation.
+- Changed the 5.1 low-capital variant to represent collapsing resources, transport, bribes, and escape routes.
+- Adjusted the 2.1 crowd-growth trigger from Order to Legitimacy.
+
+### 中文
+
+- 将变体中的 V5 技能与背景统一改为中文。
+- 重新校正变体逻辑，让每个变量都对应合理的场景后果。
+- 第五幕高暴露度变体改为第二审判庭已经到场观察。
+- 第五幕低资本信心变体改为资源、车辆、贿赂与退路枯竭，不再暴露墓中文件。
+- 第二幕守夜人数增加改由正当性下降触发。
+
 ## [1.0.2] - 2026-09-20
 
 ### English

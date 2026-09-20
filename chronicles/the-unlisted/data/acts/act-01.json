@@ -26,12 +26,12 @@
           "player_effects": [
             {
               "behavior": "阻止记者继续追查",
-              "modifier": "Manipulation + Persuasion 难度 +1",
+              "modifier": "操控 + 说服 难度 +1",
               "why": "记者已经开始怀疑官方叙事"
             },
             {
               "behavior": "利用记者散播假消息",
-              "modifier": "Manipulation + Subterfuge 难度 −1",
+              "modifier": "操控 + 欺骗 难度 −1",
               "why": "不信任制度的人更容易接受另一套说法"
             },
             {
@@ -50,12 +50,12 @@
           "player_effects": [
             {
               "behavior": "进入密室或要求交易",
-              "modifier": "Charisma + Etiquette 难度 +1",
+              "modifier": "魅力 + 礼仪 难度 +1",
               "why": "她在筛查谁值得被带进内厅"
             },
             {
               "behavior": "伪装身份或派系",
-              "modifier": "Manipulation + Subterfuge 难度 +1",
+              "modifier": "操控 + 欺骗 难度 +1",
               "why": "今晚所有人都在观察彼此的破绽"
             },
             {
@@ -74,7 +74,7 @@
           "player_effects": [
             {
               "behavior": "从后门撤离或带走证物",
-              "modifier": "Dexterity + Stealth 难度 −1",
+              "modifier": "敏捷 + 潜行 难度 −1",
               "why": "街面控制变松，后巷更容易穿行"
             },
             {
@@ -84,7 +84,7 @@
             },
             {
               "behavior": "让警察介入内部纠纷",
-              "modifier": "Politics 或 Influence 难度 +2",
+              "modifier": "政治 或 影响力 难度 +2",
               "why": "警方不会替血族解决派系问题"
             }
           ]
