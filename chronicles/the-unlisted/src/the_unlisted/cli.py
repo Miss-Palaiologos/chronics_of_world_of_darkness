@@ -4,8 +4,8 @@
 
   python -m the_unlisted.cli check
   python -m the_unlisted.cli act 3
-  python -m the_unlisted.cli scene E3T
-  python -m the_unlisted.cli advance --scene E3T --quality 3 --alloc legitimacy=2,exposure=2 --witnessed 1
+  python -m the_unlisted.cli scene 3.1
+  python -m the_unlisted.cli advance --scene 3.1 --quality 3 --alloc legitimacy=2,exposure=2 --witnessed 1
   python -m the_unlisted.cli run --quality 2 --seed 7
   python -m the_unlisted.cli render
   python -m the_unlisted.cli verify
@@ -25,7 +25,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     __package__ = "the_unlisted"
 
-from .data import WORLD_VARS, ChronicleData
+from .data import WORLD_VARS, ChronicleData, scene_label
 from .engine import Chronicle, PlayerMods
 from .render import render_all
 
@@ -111,7 +111,7 @@ def cmd_act(args: argparse.Namespace) -> int:
     print(f"\n{group['summary']}\n")
     print("场景：")
     for scene in group["scenes"]:
-        print(f"  {scene['id']} · {scene['title']} · {scene['time']}")
+        print(f"  {scene_label(scene)} · {scene['title']} · {scene['time']}")
         print(f"    {scene['premise']}\n")
     return 0
 
@@ -119,7 +119,9 @@ def cmd_act(args: argparse.Namespace) -> int:
 def cmd_scene(args: argparse.Namespace) -> int:
     data = ChronicleData.load()
     act = data.act(args.scene)
-    print(f"【{act['id']}】{act['title']}　{act['phase']}　{act['time']}")
+    print(
+        f"【{scene_label(act)}】{act['title']}　{act['phase']}　{act['time']}"
+    )
     print(f"\n前提：{act['premise']}")
     print(f"\n钩子：{act['hook']}")
     print(f"\n默认结果：{act['default_outcome']}")
@@ -149,10 +151,11 @@ def cmd_advance(args: argparse.Namespace) -> int:
     data = ChronicleData.load()
     ch = Chronicle(data)
     scenes = data.acts()
-    scene_id = args.scene.upper()
-    target = next((i for i, scene in enumerate(scenes) if scene["id"] == scene_id), None)
-    if target is None:
-        raise SystemExit(f"未知场景：{args.scene}")
+    try:
+        target_scene = data.act(args.scene)
+    except (KeyError, IndexError):
+        raise SystemExit(f"未知场景：{args.scene}") from None
+    target = scenes.index(target_scene)
     for i in range(target):
         ch.act_cursor = i
         ch.advance(PlayerMods())

@@ -17,7 +17,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     __package__ = "the_unlisted"
 
-from .data import WORLD_VARS, ChronicleData
+from .data import WORLD_VARS, ChronicleData, scene_label
 from .engine import Chronicle, PlayerMods
 
 PROFILE_ZH = {
@@ -173,25 +173,6 @@ class ChronicleGui:
         ttk.Label(tab, text="当前场景描写").pack(anchor="w", padx=8, pady=(4, 2))
         self.home_scene = ScrolledText(tab, wrap="word", height=9, font=("", 11))
         self.home_scene.pack(fill="both", expand=True, padx=8, pady=2)
-
-        ttk.Label(tab, text="当前幕变体（红字 = 当前状态命中）").pack(
-            anchor="w", padx=8, pady=(8, 2)
-        )
-        self.current_variant_tree = ttk.Treeview(
-            tab,
-            columns=("scene", "when", "text"),
-            show="headings",
-            height=5,
-        )
-        for key, label, width in (
-            ("scene", "场景", 90),
-            ("when", "条件", 180),
-            ("text", "变体语句", 760),
-        ):
-            self.current_variant_tree.heading(key, text=label)
-            self.current_variant_tree.column(key, width=width, anchor="center" if key != "text" else "w")
-        self.current_variant_tree.tag_configure("triggered", foreground="#c62828")
-        self.current_variant_tree.pack(fill="x", padx=8, pady=2)
 
         ttk.Label(tab, text="下一幕变体条件（红字 = 按当前状态会立即命中）").pack(
             anchor="w", padx=8, pady=(8, 2)
@@ -370,7 +351,7 @@ class ChronicleGui:
             group = self.data.group(scene["act"])
             self.act_text.set(
                 f"第 {group['act']} 幕 · {group['title']}　"
-                f"当前场景：{scene['id']} · {scene['title']}"
+                f"当前场景：{scene_label(scene)} · {scene['title']}"
             )
         for var in WORLD_VARS:
             self.state_text[var].set(str(self.ch.world[var]))
@@ -483,7 +464,6 @@ class ChronicleGui:
         self.result_details.insert("end", "\n".join(details) + "\n")
 
     def _render_home(self) -> None:
-        self._clear(self.current_variant_tree)
         self._clear(self.next_variant_tree)
         self.home_scene.delete("1.0", "end")
 
@@ -496,21 +476,13 @@ class ChronicleGui:
         group = self.data.group(scene["act"])
         self.home_title.set(
             f"第 {group['act']} 幕 · {group['title']}　"
-            f"当前场景：{scene['id']} · {scene['title']}"
+            f"当前场景：{scene_label(scene)} · {scene['title']}"
         )
-        self.home_scene.insert("end", f"【{scene['id']} · {scene['title']}】\n\n")
+        self.home_scene.insert(
+            "end", f"【{scene_label(scene)} · {scene['title']}】\n\n"
+        )
         for para in scene.get("scene", []):
             self.home_scene.insert("end", para + "\n\n")
-
-        for s in group["scenes"]:
-            for v in s.get("variants", []):
-                triggered = variant_triggered(v["when"], self.ch.world)
-                self.current_variant_tree.insert(
-                    "",
-                    "end",
-                    values=(s["id"], v["when"], v["text"]),
-                    tags=("triggered",) if triggered else (),
-                )
 
         next_group = self.data.groups_by_no.get(group["act"] + 1)
         if next_group:
@@ -520,7 +492,7 @@ class ChronicleGui:
                     self.next_variant_tree.insert(
                         "",
                         "end",
-                        values=(s["id"], v["when"], v["text"]),
+                        values=(scene_label(s), v["when"], v["text"]),
                         tags=("triggered",) if triggered else (),
                     )
 
@@ -558,7 +530,6 @@ class ChronicleGui:
         self.ch = Chronicle(self.data)
         self._clear(self.world_tree)
         self._clear(self.kindred_tree)
-        self._clear(self.current_variant_tree)
         self._clear(self.next_variant_tree)
         self.home_scene.delete("1.0", "end")
         self.result_details.delete("1.0", "end")

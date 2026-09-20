@@ -10,7 +10,7 @@ import html
 import json
 from pathlib import Path
 
-from .data import ACTION_TYPE, ACTION_TYPE_ZH, WORLD_VARS, ChronicleData
+from .data import ACTION_TYPE, ACTION_TYPE_ZH, WORLD_VARS, ChronicleData, scene_label
 from .engine import Chronicle
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[2]
@@ -53,9 +53,9 @@ def render_act(
     act_id = act["id"]
     L: list[str] = [HEADER] if include_header else []
     if include_header:
-        L.append(f"# 第 {act['act']} 幕 · {act['title']}\n\n")
+        L.append(f"# 第 {act['act']} 幕 · {scene_label(act)} {act['title']}\n\n")
         L.append(f"**阶段**：{act['phase']}　**时间**：{act['time']}\n\n")
-        L.append(f"**场景编号**：{act_id}\n\n")
+        L.append(f"**场景编号**：{scene_label(act)}\n\n")
         L.append("---\n\n")
 
     # 说书人视角
@@ -606,7 +606,9 @@ def render_act(
     # 局势卡
     L.append("---\n\n## 六、本幕局势卡\n\n")
     L.append("```text\n")
-    L.append(f"第 {act['act']} 幕（{act_id}）· {act['title']} · {act['time']}\n\n")
+    L.append(
+        f"第 {act['act']} 幕 · {scene_label(act)} {act['title']} · {act['time']}\n\n"
+    )
     L.append("世界状态（进入时）\n")
     L.append("  秩序 __ / 正当性 __ / 猎食条件 __ / 暴露度 __ / 资本信心 __\n")
     L.append("  档案位置：______________\n")
@@ -1372,6 +1374,7 @@ def render_all(data_dir: Path | str | None = None) -> list[Path]:
             parts = [HEADER]
             parts.append(f"# 第 {act_no} 幕 · {group['title']}\n\n")
             parts.append(f"> {group['summary']}\n\n")
+            parts.append(f"**场景编号**：{scene_label(s)}\n\n")
             parts.append(f"**阶段**：{s['phase']}　**时间**：{s['time']}\n\n")
             parts.append("---\n\n## 一、场景描写\n\n")
             parts.append("*可直接朗读。段落之间留白，不要一口气念完。*\n\n")
@@ -1394,12 +1397,16 @@ def render_all(data_dir: Path | str | None = None) -> list[Path]:
             parts.append("---\n\n## 一、场景描写\n\n")
             parts.append("*可直接朗读。每一场单独念，场与场之间不要一口气连上。*\n\n")
             for i, s in enumerate(scenes, 1):
-                parts.append(f"### 场景 {i} · {s['title']}（{s['time']}）\n\n")
+                parts.append(
+                    f"### 场景 {scene_label(s)} · {s['title']}（{s['time']}）\n\n"
+                )
                 for para in s.get("scene", []):
                     parts.append(f"{para}\n\n")
             # 其余小节：逐场，但去掉各自的结算
             for i, s in enumerate(scenes, 1):
-                parts.append(f"---\n\n# 场景 {i} · {s['title']}\n\n")
+                parts.append(
+                    f"---\n\n# 场景 {scene_label(s)} · {s['title']}\n\n"
+                )
                 body = render_act(data, s, include_header=False, include_scene=False)
                 for zh in ("一", "二", "三", "四", "五", "六"):
                     body = body.replace(f"## {zh}、", "## ")

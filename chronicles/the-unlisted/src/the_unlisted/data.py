@@ -16,6 +16,11 @@ DEFAULT_DATA_DIR = PACKAGE_ROOT / "data"
 
 WORLD_VARS: tuple[str, ...] = ("order", "legitimacy", "feeding", "exposure", "capital")
 
+
+def scene_label(scene: dict[str, Any]) -> str:
+    """Human-facing scene number: 2.1, 3.1, 6.2, etc."""
+    return f"{scene.get('act', '?')}.{scene.get('scene_no', 1)}"
+
 # 每个血族派系的行动类型，用来判定世界状态杠杆。
 ACTION_TYPE: dict[str, str] = {
     "quiet_court": "conceal",
@@ -99,6 +104,9 @@ class ChronicleData:
         self.act_groups: list[dict] = self.acts_doc["act_groups"]
         self.act_list: list[dict] = self.acts_doc["acts"]
         self.acts_by_id: dict[str, dict] = {a["id"]: a for a in self.act_list}
+        self.acts_by_label: dict[str, dict] = {
+            scene_label(a): a for a in self.act_list
+        }
         self.groups_by_no: dict[int, dict] = {
             g["act"]: g for g in self.act_groups
         }
@@ -147,7 +155,10 @@ class ChronicleData:
     def act(self, ident: str | int) -> dict:
         if isinstance(ident, int):
             return self.act_list[ident - 1]
-        return self.acts_by_id[ident.upper()]
+        key = str(ident)
+        if key in self.acts_by_label:
+            return self.acts_by_label[key]
+        return self.acts_by_id[key.upper()]
 
     def mortal_phase_stance(self, act_id: str) -> dict[str, str]:
         table = self.mortal["phase_stance"]
