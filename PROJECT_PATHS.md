@@ -3,6 +3,10 @@
 ## Repository / 仓库
 
 - Repository root / 仓库根目录：`.`
+- uv workspace root / uv 工作区：`pyproject.toml`
+- Shared lock / 共享锁文件：`uv.lock`
+- Shared environment / 共享环境：`.venv/`（唯一一份，勿在编年史目录内另建）
+- Python pin / Python 版本：`.python-version`
 - Shared setting guide / 共享世界观：`docs/vtm-v5-setting-guide.md`
 - Shared writing notes / 共享写作技法：`docs/scenario-writing-and-structure-notes.md`
 - Reference scripts / 参考剧本：`reference/*.docx`
@@ -25,19 +29,32 @@
 From repository root / 从仓库根目录运行：
 
 ```powershell
-$env:PYTHONPATH='chronicles\the-unlisted\src'
-$py='.\.venv\Scripts\python.exe'
+# 首次或依赖变化时
+uv sync --all-packages
 
-& $py -m the_unlisted.cli check
-& $py -m the_unlisted.cli render
-& $py -m the_unlisted.cli verify
-& $py -m the_unlisted.cli gui
+# 日常
+uv run --all-packages the-unlisted check
+uv run --all-packages the-unlisted render
+uv run --all-packages the-unlisted verify
+uv run --all-packages the-unlisted finale
+
+# 或者直接用共享环境的解释器
+.\.venv\Scripts\python.exe -m the_unlisted.cli check
 ```
 
-Or launch the GUI directly / 或直接启动 GUI：
+New chronicle / 新增一部编年史：
+
+```text
+1. 在 chronicles/ 下建立新目录，并在其中放 pyproject.toml（uv workspace 成员）
+2. 回到仓库根目录跑 uv sync --all-packages
+3. 不要在新目录里另建 .venv
+```
+
+Or launch the GUI directly / 或直接启动 GUI（需要带 Tcl/Tk 的解释器）：
 
 ```powershell
 .\run-unlisted-gui.ps1
+$env:CHRONICS_PYTHON = 'C:\path\to\python.exe'; .\run-unlisted-gui.ps1
 ```
 
 Or / 或：

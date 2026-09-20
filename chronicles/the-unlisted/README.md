@@ -7,16 +7,18 @@
 ## Quick Start / 快速开始
 
 ```powershell
-$env:PYTHONPATH='src'
-$py='..\..\.venv\Scripts\python.exe'
+# 从仓库根目录：环境与锁文件在最上层，只有一份
+uv sync --all-packages
 
-& $py -m the_unlisted.cli check
-& $py -m the_unlisted.cli render
-& $py -m the_unlisted.cli verify
-& $py -m the_unlisted.cli run --profile normal --seed 5
-& $py -m the_unlisted.cli finale
-& $py -m the_unlisted.cli balance --profile normal
-& $py -m the_unlisted.cli gui
+uv run --all-packages the-unlisted check
+uv run --all-packages the-unlisted render
+uv run --all-packages the-unlisted verify
+uv run --all-packages the-unlisted run --profile normal --seed 5
+uv run --all-packages the-unlisted finale
+uv run --all-packages the-unlisted balance --profile normal
+
+# GUI 需要带 Tcl/Tk 的解释器（uv 托管的 CPython 目前没有）
+.\run-unlisted-gui.ps1
 ```
 
 ## Documentation / 文档
@@ -29,6 +31,6 @@ $py='..\..\.venv\Scripts\python.exe'
 
 ## Version / 版本
 
-Current release: **1.0.5**
+Current release: **1.0.6**
 
-当前版本：**1.0.5**
+当前版本：**1.0.6**

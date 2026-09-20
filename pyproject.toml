@@ -1,0 +1,18 @@
+[project]
+name = "chronics"
+version = "0.1.0"
+description = "Multi-chronicle container for VTM V5 modern-night chronicles / 多编年史容器"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+# 仓库根目录是 uv workspace，而不是一个要安装的包。
+[tool.uv]
+package = false
+
+# 每一部编年史都是 workspace 成员，共用根目录的 .venv 与 uv.lock。
+[tool.uv.workspace]
+members = ["chronicles/*"]
+
+[dependency-groups]
+dev = []

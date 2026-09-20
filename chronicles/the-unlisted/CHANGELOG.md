@@ -1,5 +1,23 @@
 # Changelog / 版本记录
 
+## [1.0.6] - 2026-09-20
+
+### English
+
+- Repository layout: the repo root is now a uv workspace with a single lock file and a single `.venv` at the top level. This chronicle is a workspace member package.
+- Removed the duplicated nested `.venv` inside the chronicle folder; chronicle folders now hold content and packages only.
+- Synced `pyproject.toml` with `VERSION` (it had been stuck at 1.0.3) and moved the Python pin to the repository root.
+- Documented `uv sync --all-packages` / `uv run --all-packages the-unlisted <cmd>` in the repository and chronicle readmes.
+- The GUI launcher now picks a Tk-capable interpreter automatically, because uv-managed CPython currently ships without usable Tcl/Tk.
+
+### 中文
+
+- 仓库结构：根目录改为 uv workspace，锁文件与虚拟环境只在最高目录保留一份；本编年史作为 workspace 成员包。
+- 删除编年史目录内重复的嵌套 `.venv`；编年史目录现在只放内容与包本身。
+- `pyproject.toml` 的版本号与 `VERSION` 重新对齐（此前停留在 1.0.3），Python 版本固定文件移到仓库根目录。
+- 仓库与本编年史的 README 改为 `uv sync --all-packages` / `uv run --all-packages the-unlisted <子命令>` 的用法。
+- GUI 启动脚本会自动挑选带 Tcl/Tk 的解释器，因为 uv 托管的 CPython 目前不带可用的 Tcl/Tk。
+
 ## [1.0.5] - 2026-09-20
 
 ### English

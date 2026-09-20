@@ -7,33 +7,27 @@
 在项目根目录运行：
 
 ```powershell
-$env:PYTHONPATH='src'
-$py='..\..\.venv\Scripts\python.exe'
+# 仓库根目录：uv workspace，环境与锁文件只有一份
+uv sync --all-packages
 
-& $py -m the_unlisted.cli check
-& $py -m the_unlisted.cli render
-& $py -m the_unlisted.cli verify
-& $py -m the_unlisted.cli run --profile normal --seed 5
-& $py -m the_unlisted.cli finale
-& $py -m the_unlisted.cli balance --profile normal
+uv run --all-packages the-unlisted check
+uv run --all-packages the-unlisted render
+uv run --all-packages the-unlisted verify
+uv run --all-packages the-unlisted run --profile normal --seed 5
+uv run --all-packages the-unlisted finale
+uv run --all-packages the-unlisted balance --profile normal
 ```
 
 需要图形界面时：
 
 ```powershell
-& $py -m the_unlisted.cli gui
+.\run-unlisted-gui.ps1
 ```
 
 图形界面分三个页签：「当前局面」显示当前场景描写、本幕变体与下一幕变体条件（红字为当前立即命中，点选条目可看玩家行为与难度）；「本场结算」分世界状态、血族变化、终局判定、结算明细四页；顶部常驻逃亡准备进度条与**托管档案当前去向**。
 「道具与手动修正」页有三块：**托管档案去向下拉框**（默认世界线，可手动改并计入影响）、**人类阵营合法能力修正**（密室交易的唯一直接杠杆，决定谁在议程上）、血族派系状态修正；「自定义玩家行动」同样在这一页：把玩家模板切到 `custom`，再填写结果质量、修正池、目击次数、混乱与逃亡准备。
 
-如果直接运行脚本，也可以使用：
-
-```powershell
-& $py src\the_unlisted\cli.py gui
-```
-
-图形界面需要当前 Python 带有可用的 Tcl/Tk。若启动时报「缺少可用的 Tcl/Tk」，改用 conda 或官方安装版的 Python 运行同一条命令即可；剧本与结算引擎本身不依赖图形界面。
+图形界面需要当前 Python 带有可用的 Tcl/Tk。uv 托管的 CPython 目前不带可用的 Tcl/Tk，所以启动脚本会自动去找一个带 Tk 的解释器（也可以用 `$env:CHRONICS_PYTHON` 指定）。剧本与结算引擎本身不依赖图形界面。
 
 ## 常用命令
 
