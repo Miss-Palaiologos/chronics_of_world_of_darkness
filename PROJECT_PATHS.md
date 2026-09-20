@@ -1,33 +1,47 @@
-# 项目路径
+# Project Paths / 项目路径
 
-## 当前剧本
+## Repository / 仓库
 
-- 标题：**《不在册者》**
-- 项目根目录：`the-unlisted/`
-- 数据目录：`the-unlisted/data/`
-- 源目录：`the-unlisted/src/the_unlisted/`
-- 剧本文档：`the-unlisted/docs/`
-- 幕文件：`the-unlisted/docs/acts/act-01.md` 至 `act-06.md`
-- 名册总表：`the-unlisted/docs/roster.md`
-- 图形看板：`the-unlisted/docs/dashboard.html`
-- 项目说明：`the-unlisted/README.md`
-- 系统说明：`the-unlisted/docs/system.md`
+- Repository root / 仓库根目录：`.`
+- Shared setting guide / 共享世界观：`docs/vtm-v5-setting-guide.md`
+- Shared writing notes / 共享写作技法：`docs/scenario-writing-and-structure-notes.md`
+- Reference scripts / 参考剧本：`reference/*.docx`
+- Chronicle index / 编年史索引：`chronicles/README.md`
 
-## 共享资料
+## The Unlisted / 《不在册者》
 
-- 世界观总结：`docs/vtm-v5-setting-guide.md`
-- 写作技法总结：`docs/scenario-writing-and-structure-notes.md`
-- 参考剧本：`reference/*.docx`
+- Chronicle root / 编年史根目录：`chronicles/the-unlisted/`
+- Version / 版本：`chronicles/the-unlisted/VERSION`
+- Changelog / 版本记录：`chronicles/the-unlisted/CHANGELOG.md`
+- Data / 数据：`chronicles/the-unlisted/data/`
+- Source / 代码：`chronicles/the-unlisted/src/the_unlisted/`
+- Docs / 文档：`chronicles/the-unlisted/docs/`
+- Acts / 幕文件：`chronicles/the-unlisted/docs/acts/act-01.md` ... `act-06.md`
+- Roster / 名册总表：`chronicles/the-unlisted/docs/roster.md`
+- Dashboard / 图形看板：`chronicles/the-unlisted/docs/dashboard.html`
 
-## 运行
+## Commands / 命令
+
+From repository root / 从仓库根目录运行：
 
 ```powershell
-cd D:\trpg\wod\chronics\the-unlisted
-$env:PYTHONPATH='src'
-$py='..\.venv\Scripts\python.exe'
+$env:PYTHONPATH='chronicles\the-unlisted\src'
+$py='.\.venv\Scripts\python.exe'
 
 & $py -m the_unlisted.cli check
 & $py -m the_unlisted.cli render
 & $py -m the_unlisted.cli verify
 & $py -m the_unlisted.cli gui
+```
+
+Or launch the GUI directly / 或直接启动 GUI：
+
+```powershell
+.\run-unlisted-gui.ps1
+```
+
+Or / 或：
+
+```text
+run-unlisted-gui.cmd
 ```
