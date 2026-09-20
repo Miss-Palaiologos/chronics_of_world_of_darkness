@@ -33,7 +33,7 @@ if (-not $python) {
     Write-Host 'The uv-managed CPython ships without usable Tcl/Tk; the GUI needs a python.org or conda interpreter.'
     Write-Host 'Point the script at one and retry:'
     Write-Host '  $env:CHRONICS_PYTHON = "C:\path\to\python.exe"; .\run-unlisted-gui.ps1'
-    Write-Host 'CLI usage is unaffected: uv run --all-packages the-unlisted check'
+    Write-Host 'CLI usage is unaffected: uv run the-unlisted check'
     exit 1
 }
 

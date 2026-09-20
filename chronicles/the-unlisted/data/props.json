@@ -141,6 +141,9 @@
             "exposure": 5,
             "legitimacy": -1
           },
+          "mortal_delta": {
+            "sovereign": 1
+          },
           "note": "全城血族暴露。避世戒律破裂。"
         },
         {
@@ -157,6 +160,9 @@
           "delta": {
             "exposure": -2
           },
+          "mortal_delta": {
+            "union": 1
+          },
           "note": "缄默庭安全，其他人永远不知道自己被写过什么。"
         },
         {
@@ -169,6 +175,9 @@
           "kindred_delta": {
             "barricade": 1
           },
+          "mortal_delta": {
+            "sovereign": 1
+          },
           "note": "街垒要的正是这个。街垒能力 +1。"
         },
         {
@@ -176,6 +185,9 @@
           "action": "保存（不公开也不销毁）",
           "delta": {
             "exposure": -1
+          },
+          "mortal_delta": {
+            "union": 1
           },
           "note": "**最难也最强的一条。** 掌握它的人对所有派系都有杠杆——但它需要一处别人找不到的地方。"
         },

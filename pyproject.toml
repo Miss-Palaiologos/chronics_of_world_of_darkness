@@ -6,13 +6,20 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
 
-# 仓库根目录是 uv workspace，而不是一个要安装的包。
-[tool.uv]
-package = false
+[project.scripts]
+the-unlisted = "the_unlisted.cli:main"
 
-# 每一部编年史都是 workspace 成员，共用根目录的 .venv 与 uv.lock。
-[tool.uv.workspace]
-members = ["chronicles/*"]
+# 单一工程、单一环境：编年史不再各自成包，而是由根项目统一打包与安装。
+[tool.uv]
+package = true
+
+[tool.uv.build-backend]
+module-root = "chronicles/the-unlisted/src"
+module-name = "the_unlisted"
+
+[build-system]
+requires = ["uv_build>=0.12.9,<0.13.0"]
+build-backend = "uv_build"
 
 [dependency-groups]
 dev = []

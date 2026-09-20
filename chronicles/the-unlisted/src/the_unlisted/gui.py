@@ -398,9 +398,10 @@ class ChronicleGui:
         self.mortal_combo.grid(row=0, column=0, padx=(0, 8))
         ttk.Label(mortal_box, text="合法能力 ±1").grid(row=0, column=1, padx=4)
         self.mortal_delta = tk.IntVar(value=0)
-        ttk.Spinbox(
+        self.mortal_spin = ttk.Spinbox(
             mortal_box, from_=-1, to=1, textvariable=self.mortal_delta, width=4
-        ).grid(row=0, column=2)
+        )
+        self.mortal_spin.grid(row=0, column=2)
         ttk.Button(mortal_box, text="应用", command=self._apply_mortal_capability).grid(
             row=0, column=3, padx=12
         )
@@ -554,6 +555,15 @@ class ChronicleGui:
                 + "　".join(
                     f"{self.data.kindred_factions[f]['zh']} 能力 {v:+d}"
                     for f, v in kd.items()
+                )
+            )
+        md = opt.get("mortal_delta", {})
+        if md:
+            lines.append(
+                "人类影响（记入玩家账本）："
+                + "　".join(
+                    f"{self.data.mortal_factions[f]['zh']} 合法能力 {v:+d}"
+                    for f, v in md.items()
                 )
             )
         if opt.get("note"):
@@ -728,8 +738,20 @@ class ChronicleGui:
         if r["agenda"]["tie"]:
             lines.insert(
                 1,
-                "※ 主权派与联盟派效果相同——按平局判定："
-                "条约先被写下来，所以联盟派优先。",
+                "※ 前两名同分——先看玩家账本，再看程序顺序（技术官僚派 ＞ 联盟派 ＞ 主权派）。",
+            )
+        ledger = r["agenda"]["ledger"]
+        lines.insert(
+            1,
+            f"玩家账本：技术官僚派 {ledger.get('continuity', 0):+d}　"
+            f"联盟派 {ledger.get('union', 0):+d}　主权派 {ledger.get('sovereign', 0):+d}　"
+            f"（本幕一次交易 = ±{r['agenda']['deal_step']} 格）",
+        )
+        if len(r["agenda"]["table"]) > 1 and not r["agenda"]["tie"]:
+            lines.insert(
+                2,
+                f"翻盘成本：把议程翻给 {r['agenda']['table'][1]['zh']} 需要 "
+                f"{r['agenda']['flip_cost']:.2f} 格合法能力。",
             )
         if r["collapse"]:
             lines += [
@@ -878,9 +900,12 @@ class ChronicleGui:
                 if delta
                 else f"{st.zh} {st.capability['legal']}"
             )
+        step = self.ch.deal_step()
+        self.mortal_spin.configure(from_=-step, to=step)
         self.mortal_note.set(
             "　".join(parts)
-            + "　—— 效果 = 能力 × 立场烈度 × 世界状态杠杆；每 ±1 就可能换一次议程。"
+            + f"　—— 本幕一次交易 = ±{step} 格合法能力；"
+            "效果 = 能力 × 立场烈度 × 世界状态杠杆，同分时先看谁被玩家抬过。"
         )
 
     # ------------------------------------------------------------------

@@ -1,5 +1,21 @@
 # Changelog / 版本记录
 
+## [1.0.7] - 2026-09-20
+
+### English
+
+- **One project, one environment.** The uv workspace is gone: the repository root is now the only uv project (`pyproject.toml` + `uv.lock` + `.venv`), and it packages the chronicle source tree through `tool.uv.build-backend`. `uv sync` and `uv run the-unlisted <command>` replace the `--all-packages` forms, and `chronicles/the-unlisted/pyproject.toml` was deleted.
+- **Players now decide the final vote.** The capital-confidence lever dropped from ×1.2 to ×1.1, the player ledger outranks the procedural tie-break, and last-night deals are worth ±2 capability instead of ±1.
+- The trusteeship archive now feeds the same ledger: publishing it or handing over the victim list gives the Sovereignists +1 legal capability; keeping or destroying it gives the Unionists +1.
+- `finale` and the GUI report the player ledger, the per-act deal size, and the exact flip cost (e.g. "0.50 capability steps — one deal is ±2").
+
+### 中文
+
+- **一个工程，一个环境。** 取消 uv workspace：仓库根目录现在是唯一的 uv 工程（`pyproject.toml` + `uv.lock` + `.venv`），并通过 `tool.uv.build-backend` 直接打包编年史源码树；`uv sync` 与 `uv run the-unlisted <命令>` 取代了 `--all-packages` 写法，`chronicles/the-unlisted/pyproject.toml` 已删除。
+- **终局胜负改由玩家决定。** 资本信心杠杆从 ×1.2 降到 ×1.1；平局时玩家账本排在程序顺序之前；最后一夜的密室交易分量从 ±1 提高到 ±2。
+- 托管档案的去向也记入同一本账：公开或只交受害者名单给主权派 +1 合法能力；保存或销毁给联盟派 +1。
+- `finale` 与界面会输出玩家账本、本幕交易分量，以及精确的翻盘成本（例如「需要 0.50 格，而一次交易是 ±2 格」）。
+
 ## [1.0.6] - 2026-09-20
 
 ### English

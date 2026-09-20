@@ -845,6 +845,17 @@ def render_mortal(data: ChronicleData) -> str:
             L.append(f"\n**{tie['zh']}**：{tie['rule']}\n\n")
             if tie.get("suspense"):
                 L.append(f"{tie['suspense']}\n\n")
+        deals = data.mortal.get("deals")
+        if deals:
+            L.append(f"### {deals['zh']}\n\n")
+            L.append(f"{deals['rule']}\n\n")
+            L.append("| 幕 | 单次交易幅度 |\n| --- | --- |\n")
+            for a in acts:
+                step = deals.get("by_act", {}).get(a["id"], deals.get("default_step", 1))
+                L.append(f"| {a['id']} | ±{step} 格合法能力 |\n")
+            L.append(f"\n累计上限：±{deals.get('cumulative_cap', 3)}。\n\n")
+            if deals.get("why_two_channels"):
+                L.append(f"{deals['why_two_channels']}\n\n")
     L.append("\n---\n\n## 三、人物表\n\n")
     for c in data.mortal["characters"]:
         fac = data.mortal_factions[c["faction"]]["zh"] if c.get("faction") else "—"
@@ -1007,7 +1018,18 @@ def render_props(data: ChronicleData) -> str:
         for oc in p["outcomes"]:
             d = oc.get("delta", {})
             cells = " | ".join(_delta_cell(d.get(v, 0)) for v in WORLD_VARS)
-            L.append(f"| **{oc['action']}** | {cells} | {oc['note']} |\n")
+            md = oc.get("mortal_delta", {})
+            mortal_note = ""
+            if md:
+                mortal_note = "人类账本：" + "、".join(
+                    f"{data.mortal_factions[f]['zh']} 合法能力 {v:+d}"
+                    for f, v in md.items()
+                )
+            L.append(
+                f"| **{oc['action']}** | {cells} | {oc['note']}"
+                + (f"<br>{mortal_note}" if mortal_note else "")
+                + " |\n"
+            )
         default_line = p.get("default_line")
         if default_line:
             var_zh = {

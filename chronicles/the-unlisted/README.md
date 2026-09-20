@@ -7,15 +7,15 @@
 ## Quick Start / 快速开始
 
 ```powershell
-# 从仓库根目录：环境与锁文件在最上层，只有一份
-uv sync --all-packages
+# 从仓库根目录：整个仓库只有一个工程、一个环境
+uv sync
 
-uv run --all-packages the-unlisted check
-uv run --all-packages the-unlisted render
-uv run --all-packages the-unlisted verify
-uv run --all-packages the-unlisted run --profile normal --seed 5
-uv run --all-packages the-unlisted finale
-uv run --all-packages the-unlisted balance --profile normal
+uv run the-unlisted check
+uv run the-unlisted render
+uv run the-unlisted verify
+uv run the-unlisted run --profile normal --seed 5
+uv run the-unlisted finale
+uv run the-unlisted balance --profile normal
 
 # GUI 需要带 Tcl/Tk 的解释器（uv 托管的 CPython 目前没有）
 .\run-unlisted-gui.ps1
@@ -31,6 +31,6 @@ uv run --all-packages the-unlisted balance --profile normal
 
 ## Version / 版本
 
-Current release: **1.0.6**
+Current release: **1.0.7**
 
-当前版本：**1.0.6**
+当前版本：**1.0.7**

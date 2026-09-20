@@ -7,15 +7,15 @@
 在项目根目录运行：
 
 ```powershell
-# 仓库根目录：uv workspace，环境与锁文件只有一份
-uv sync --all-packages
+# 仓库根目录：整个仓库只有一个工程、一个环境
+uv sync
 
-uv run --all-packages the-unlisted check
-uv run --all-packages the-unlisted render
-uv run --all-packages the-unlisted verify
-uv run --all-packages the-unlisted run --profile normal --seed 5
-uv run --all-packages the-unlisted finale
-uv run --all-packages the-unlisted balance --profile normal
+uv run the-unlisted check
+uv run the-unlisted render
+uv run the-unlisted verify
+uv run the-unlisted run --profile normal --seed 5
+uv run the-unlisted finale
+uv run the-unlisted balance --profile normal
 ```
 
 需要图形界面时：

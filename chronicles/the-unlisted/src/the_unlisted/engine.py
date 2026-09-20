@@ -282,6 +282,7 @@ class Chronicle:
             "manual": self.archive_manual,
             "delta": dict(opt.get("delta", {})),
             "kindred_delta": dict(opt.get("kindred_delta", {})),
+            "mortal_delta": dict(opt.get("mortal_delta", {})),
             "note": opt.get("note", ""),
         }
 
@@ -307,6 +308,10 @@ class Chronicle:
             for fid, dv in report["kindred_delta"].items():
                 if fid in self.kindred:
                     self.change_kindred(fid, capability_delta=int(dv))
+            for fid, dv in report["mortal_delta"].items():
+                if fid in self.mortal:
+                    # 档案去向同样记在玩家账本上：它是玩家亲手决定的事。
+                    self.change_mortal_capability(fid, int(dv))
             report["applied"] = True
             report["world"] = dict(self.world)
         return report
@@ -316,20 +321,40 @@ class Chronicle:
         self._sync_archive(self.current_act_id())
         return self.archive_report()
 
+    def deal_step(self, act_id: str | None = None) -> int:
+        """本幕一次密室交易能扳动多少格合法能力。最后一夜翻倍。"""
+        cfg = self.data.mortal.get("deals", {})
+        act_id = act_id or self.current_act_id()
+        return int(cfg.get("by_act", {}).get(act_id, cfg.get("default_step", 1)))
+
+    def mortal_ledger(self) -> dict[str, int]:
+        """玩家账本：每一方累计被玩家抬／压了多少格合法能力。"""
+        return {
+            fid: int(self.mortal_capability_delta.get(fid, 0))
+            for fid in self.mortal
+        }
+
     def change_mortal_capability(self, faction_id: str, delta: int) -> dict[str, Any]:
         """玩家通过密室交易抬高或压低一个人类阵营的制度能力。
 
-        **人类能力不会自己变。** 这是第七幕三根杠杆的电源：
-        谁在议程上，取决于各阵营的行动效果，而效果里唯一能被玩家直接扳动的乘数就是它。
-        累计修正每幕最多 ±1，总上限 ±3。
+        **人类能力不会自己变。** 谁在议程上，取决于各阵营的行动效果，
+        而效果里唯一能被玩家直接扳动的乘数就是它。
+
+        单次幅度 = `mortal.json` 的 `deals`（默认 ±1，6.1／6.2 为 ±2），
+        累计上限同样是数据里的 `cumulative_cap`。
         """
+        step = self.deal_step()
+        delta = max(-step, min(step, int(delta)))
+        cap = int(self.data.mortal.get("deals", {}).get("cumulative_cap", 3))
         cur = self.mortal_capability_delta.get(faction_id, 0)
-        self.mortal_capability_delta[faction_id] = max(-3, min(3, cur + delta))
+        self.mortal_capability_delta[faction_id] = max(-cap, min(cap, cur + delta))
         self._sync_mortal(self.current_act_id())
         st = self.mortal[faction_id]
         return {
             "阵营": st.zh,
             "合法能力": st.capability["legal"],
+            "本次": self.mortal_capability_delta[faction_id] - cur,
+            "单次幅度": step,
             "累计修正": self.mortal_capability_delta[faction_id],
         }
 
@@ -370,6 +395,16 @@ class Chronicle:
 
         ranked = sorted(self.mortal_actions(), key=self._rank_key)
         winner = ranked[0]
+        flip_cost = 0.0
+        if len(ranked) > 1:
+            lead, chaser = ranked[0], ranked[1]
+            step_effect = (
+                chaser.effect / chaser.capability_score
+                if chaser.capability_score
+                else 0.0
+            )
+            if step_effect:
+                flip_cost = round((lead.effect - chaser.effect) / step_effect, 2)
         narratives = {
             n["nominated_by"]: n
             for n in sc.get("institutional", {}).get("narratives", [])
@@ -447,6 +482,9 @@ class Chronicle:
                 "tie": len(ranked) > 1
                 and abs(ranked[0].effect - ranked[1].effect) < 1e-9,
                 "tie_rule": self.data.mortal.get("tie_break", {}).get("rule", ""),
+                "ledger": self.mortal_ledger(),
+                "deal_step": self.deal_step(),
+                "flip_cost": round(flip_cost, 2),
                 "table": [
                     {
                         "zh": a.zh,
@@ -553,10 +591,15 @@ class Chronicle:
             applied.append(row["why"])
         return factor, applied
 
-    def _rank_key(self, effect: MortalEffect) -> tuple[float, int, str]:
-        """排序：先看行动效果，平局看平局优先级（数据里定义），最后按 id 稳定排序。"""
+    def _rank_key(self, effect: MortalEffect) -> tuple[float, int, int, str]:
+        """排序：行动效果 → 玩家账本 → 程序顺序 →（最后按 id 稳定排序）。
+
+        玩家账本排在程序顺序之前，是这一版的核心改动：
+        同分时，谁被玩家抬过，谁就先拿到议程。
+        """
         return (
             -effect.effect,
+            -max(0, self.mortal_capability_delta.get(effect.faction_id, 0)),
             self.data.mortal_tie_priority.get(effect.faction_id, 99),
             effect.faction_id,
         )

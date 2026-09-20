@@ -122,7 +122,10 @@ def cmd_balance(args: argparse.Namespace) -> int:
     data = ChronicleData.load()
     ch = Chronicle(data)
     mods = _profile_player_mods(args.profile) if args.profile else PlayerMods()
-    print(f"{'幕':<6}{'在议程上':<10}{'第一名':>8}{'第二名':>8}{'差距':>8}  说明")
+    print(
+        f"{'幕':<6}{'在议程上':<10}{'第一名':>8}{'第二名':>8}{'差距':>8}"
+        f"{'交易':>6}  说明"
+    )
     for i, act in enumerate(data.acts()):
         ch.act_cursor = i
         res = ch.advance(mods)
@@ -135,9 +138,10 @@ def cmd_balance(args: argparse.Namespace) -> int:
         else:
             step = first["effect"] / first["capability"] if first["capability"] else 0
             tail = f"≈{gap / step:.1f} 格合法能力" if step else "—"
+        deal = ch.deal_step(act["id"])
         print(
             f"{act['id']:<6}{ag['zh']:<10}{first['effect']:>8.2f}{second['effect']:>8.2f}"
-            f"{gap:>8.2f}  {tail}"
+            f"{gap:>8.2f}{'±' + str(deal):>6}  {tail}"
         )
         if res.collapse:
             print(f"      >>> 崩盘：{res.collapse['zh']}（后续幕不再结算）")
@@ -313,13 +317,25 @@ def _print_finale(ch: Chronicle, projection: bool = False) -> None:
         if abs(gap) < 1e-9:
             print(
                 f"  前两名完全同分：{table[0]['zh']} 与 {table[1]['zh']}"
-                "——按平局判定，条约先被写下来的一方胜。"
+                "——先看玩家账本，再看程序顺序。"
             )
         elif step:
             print(
                 f"  前两名差距：{gap:.2f} ≈ {gap / step:.1f} 格合法能力"
                 f"（{table[0]['zh']} vs {table[1]['zh']}）"
             )
+    ledger = r["agenda"]["ledger"]
+    ledger_zh = {"continuity": "技术官僚派", "union": "联盟派", "sovereign": "主权派"}
+    print(
+        "  玩家账本："
+        + "　".join(f"{zh} {ledger[fid]:+d}" for fid, zh in ledger_zh.items())
+        + f"　（本幕一次交易 = ±{r['agenda']['deal_step']} 格）"
+    )
+    if len(table) > 1 and abs(table[0]["effect"] - table[1]["effect"]) >= 1e-9:
+        print(
+            f"  把议程翻给 {table[1]['zh']} 需要 {r['agenda']['flip_cost']:.2f} 格合法能力"
+            f"——本幕一次交易就能给到 ±{r['agenda']['deal_step']} 格。"
+        )
     print(f"  制度侧提名（{inst['nominated_by']}）：{inst['who']}｜{inst['means']}")
     print(f"    那句话：「{inst['line']}」")
     if r["street_override"]:
@@ -480,7 +496,8 @@ def cmd_finale(args: argparse.Namespace) -> int:
             target = data.acts().index(data.act(args.scene))
         except (KeyError, IndexError):
             raise SystemExit(f"未知场景：{args.scene}") from None
-        for i in range(target):
+        # 把请求的那一幕也结算掉：判定用的是这一幕结束时的立场与交易分量。
+        for i in range(target + 1):
             ch.act_cursor = i
             res = ch.advance(mods)
             if res.collapse:

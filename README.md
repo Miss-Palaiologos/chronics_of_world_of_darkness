@@ -12,9 +12,9 @@ This repository is a **collection**, not a single scenario. Each chronicle lives
 
 ```text
 .
-├── pyproject.toml                     # uv workspace root / uv 工作区根
-├── uv.lock                            # Single lock for all chronicles / 全仓库共用锁
-├── .venv/                             # Single shared environment / 唯一的共享环境
+├── pyproject.toml                     # The only project file / 唯一的工程文件
+├── uv.lock                            # The only lock file / 唯一的锁文件
+├── .venv/                             # The only environment / 唯一的环境
 ├── PROJECT_PATHS.md                   # Path registry / 路径索引
 ├── README.md                          # Repository index / 仓库入口
 ├── docs/                              # Shared guides / 共享资料
@@ -34,22 +34,22 @@ This repository is a **collection**, not a single scenario. Each chronicle lives
 
 | Chronicle / 编年史 | Folder / 目录 | Version / 版本 | Status / 状态 |
 | --- | --- | --- | --- |
-| **The Unlisted / 《不在册者》** | `chronicles/the-unlisted/` | `1.0.6` | Public draft / 公开初稿 |
+| **The Unlisted / 《不在册者》** | `chronicles/the-unlisted/` | `1.0.7` | Public draft / 公开初稿 |
 
 ## Quick Start / 快速开始
 
-**One environment for the whole repository.** The repo root is a [uv](https://docs.astral.sh/uv/) workspace; every chronicle is a member package.
+**One project, one environment.** The repository root is the only [uv](https://docs.astral.sh/uv/) project: one `pyproject.toml`, one `uv.lock`, one `.venv`. Chronicle folders hold content and code, not their own environments or package manifests.
 
-**全仓库共用一个环境。** 仓库根目录是 uv workspace，每部编年史都是一个成员包。环境与锁文件都在最高目录，只有一份。
+**一个工程，一个环境。** 仓库根目录是唯一的 uv 工程：一份 `pyproject.toml`、一份 `uv.lock`、一个 `.venv`。编年史目录只放内容与代码，不再各自建环境或维护独立的包清单。
 
 ```powershell
 # 第一次使用，或改了 pyproject 之后：在仓库根目录同步一次
-uv sync --all-packages
+uv sync
 
-# 之后可以直接跑（the-unlisted 已经装进根目录的 .venv）
-uv run --all-packages the-unlisted check
-uv run --all-packages the-unlisted render
-uv run --all-packages the-unlisted verify
+# 之后可以直接跑（编年史代码已经装进根目录的 .venv）
+uv run the-unlisted check
+uv run the-unlisted render
+uv run the-unlisted verify
 
 # 也可以用共享环境的解释器，不需要 PYTHONPATH
 .\.venv\Scripts\python.exe -m the_unlisted.cli check
@@ -58,10 +58,10 @@ uv run --all-packages the-unlisted verify
 
 | 命令 | 用途 |
 | --- | --- |
-| `uv sync --all-packages` | 在根目录同步全部编年史的依赖 |
+| `uv sync` | 在根目录同步工程依赖 |
 | `uv lock` | 更新根目录的 `uv.lock` |
-| `uv run --all-packages the-unlisted <子命令>` | 不解锁直接运行某部编年史 |
-| `uv add --package the-unlisted <包>` | 给某部编年史加依赖 |
+| `uv run the-unlisted <子命令>` | 不解锁直接运行编年史命令 |
+| `uv add <包>` | 给工程加依赖 |
 
 ## GUI / 图形界面
 
@@ -88,13 +88,15 @@ run-unlisted-gui.cmd
 - Git tags are namespaced by chronicle: `the-unlisted-v1.0.0`.
 - Shared guides and reference files do not carry chronicle version numbers.
 - Generated documents are produced from each chronicle's own `data/` folder.
-- The workspace layout, lock file, and virtual environment live at the repository root; chronicle folders hold content and packages, not environments.
+- The project file, lock file, and virtual environment live at the repository root; chronicle folders hold content and code, not environments.
+- All chronicle Python code is packaged by the single root project (`tool.uv.build-backend` points at the chronicle source tree); command-line entry points live in the root `pyproject.toml`.
 
 - 每部编年史独立维护 `VERSION` 与 `CHANGELOG.md`。
 - Git 标签按编年史命名，例如 `the-unlisted-v1.0.0`。
 - 共享资料与参考文件不绑定单部编年史的版本号。
 - 生成文档从各自编年史的 `data/` 目录产出。
-- workspace 布局、锁文件与虚拟环境放在仓库根目录；编年史目录只放内容与包本身，不再各自建环境。
+- 工程配置、锁文件与虚拟环境放在仓库根目录；编年史目录只放内容与代码，不再各自建环境。
+- 编年史的 Python 代码由根工程统一打包（`tool.uv.build-backend` 指向编年史源码树），命令行入口写在根 `pyproject.toml`。
 
 ## Rights / 权利说明
 
