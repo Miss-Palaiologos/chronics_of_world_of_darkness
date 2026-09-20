@@ -1,5 +1,27 @@
 # Changelog / 版本记录
 
+## [1.0.4] - 2026-09-20
+
+### English
+
+- Rewrote scene 5.1 completely: the whole scene now takes place at the Yong An cemetery and tomb. All building, corridor, stairwell, and archive-room remnants are gone.
+- Fixed the arrival order at the tomb: the Silent Court first, then the technocratic government with military police and special tactics, while the Second Inquisition stays outside to fish for a big fish. Blood servants appear only after blood is spilled or someone dies; if the Methuselah wakes, the Inquisition enters and kills everyone.
+- Replaced the water-utility hook with jurisdiction: the case file cannot be retrieved because the site of the incident falls inside the joint authority zone drawn by the trusteeship record.
+- Localized remaining English skill and name leftovers: ` Leadership` became 领导力, and Kavita, Daniel, and Nadia are now 卡维塔、蔡丹尼、娜迪亚.
+- Removed the split banners from act 3 (the movement has not split yet) and changed the Unionist slogan to 「公开附件，落实过渡」 in act 4.
+- Added finale resolution: the engine now reads human faction strength and outputs who holds the agenda, who becomes the scapegoat, which sentence is written, and how the events are characterized. Wired into `the_unlisted.cli finale` and the GUI 终局判定 tab.
+- Rebuilt the GUI layout: scene and variants split into panes, settlement split into four sub-tabs, and an escape-preparation progress bar in the header.
+
+### 中文
+
+- 完全重写 5.1：整幕都发生在永安义山与墓前，删去所有楼房、走廊、楼梯与档案室残留。
+- 固定墓前到场顺序：缄默庭先到，随后是技术官僚派的宪特与特警；第二审判庭留在义山外围钓大鱼。血仆只在见血或有人死亡后出现；玛土撒拉一旦被唤醒，审判庭进场清场。
+- 「水务条款」改为「管辖权条款」：案卷调不出来，是因为案发地在托管记录里被划入联合机构辖区。
+- 统一残留英文：` Leadership` 改为领导力，Kavita／Daniel／Nadia 改为卡维塔／蔡丹尼／娜迪亚。
+- 第三幕删去两派各自的横幅（运动尚未分裂）；第四幕联盟派口号改为「公开附件，落实过渡」。
+- 新增终局判定：按人类各派力量对比输出谁在议程上、谁是替罪羊、那句话怎么写、事件如何被定性；接入 CLI `finale` 与界面「终局判定」页。
+- 重排界面：当前局面分上下栏、变体左右分栏；本场结算拆成四个子页；顶部加入逃亡准备进度条。
+
 ## [1.0.3] - 2026-09-20
 
 ### English
@@ -23,13 +45,13 @@
 ### English
 
 - Added explicit meaning, scene expression, player behavior, and difficulty effects to every variant entry.
-- Replaced loose terms with V5 skills and backgrounds such as Politics, Academics (Law), Resources, Influence, Leadership, Subterfuge, Stealth, and Investigation.
+- Replaced loose terms with V5 skills and backgrounds such as Politics, Academics (Law), Resources, Influence, Leadership (领导力), Subterfuge, Stealth, and Investigation.
 - Updated generated act documents and the GUI variant table to show the new mechanics.
 
 ### 中文
 
 - 为每个变体词条补充明确的世界含义、场景体现、玩家行为与难度影响。
-- 将“官僚”“资源”等松散说法替换为 V5 技能与背景，例如 Politics、Academics（Law）、Resources、Influence、Leadership、Subterfuge、Stealth、Investigation。
+- 将“官僚”“资源”等松散说法替换为 V5 技能与背景，例如政治、学术（法律）、资源、影响力、领导力、欺骗、潜行、调查。
 - 生成幕文档与 GUI 变体表同步展示新机制。
 
 ## [1.0.1] - 2026-09-20

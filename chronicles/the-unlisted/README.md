@@ -14,6 +14,7 @@ $py='..\..\.venv\Scripts\python.exe'
 & $py -m the_unlisted.cli render
 & $py -m the_unlisted.cli verify
 & $py -m the_unlisted.cli run --profile normal --seed 5
+& $py -m the_unlisted.cli finale
 & $py -m the_unlisted.cli gui
 ```
 
@@ -27,6 +28,6 @@ $py='..\..\.venv\Scripts\python.exe'
 
 ## Version / 版本
 
-Current release: **1.0.3**
+Current release: **1.0.4**
 
-当前版本：**1.0.3**
+当前版本：**1.0.4**

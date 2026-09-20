@@ -14,6 +14,7 @@ $py='..\..\.venv\Scripts\python.exe'
 & $py -m the_unlisted.cli render
 & $py -m the_unlisted.cli verify
 & $py -m the_unlisted.cli run --profile normal --seed 5
+& $py -m the_unlisted.cli finale
 ```
 
 需要图形界面时：
@@ -22,7 +23,7 @@ $py='..\..\.venv\Scripts\python.exe'
 & $py -m the_unlisted.cli gui
 ```
 
-图形界面会显示当前场景描写、下一幕变体条件、世界状态分解、派系能力与耐心变化和逃亡准备，并提供主持人手动修正入口。
+图形界面分三个页签：「当前局面」显示当前场景描写、本幕变体与下一幕变体条件（红字为当前立即命中，点选条目可看玩家行为与难度）；「本场结算」分世界状态、血族变化、终局判定、结算明细四页；顶部常驻逃亡准备进度条。
 「自定义玩家行动」在本 GUI 的第三个页签中：把玩家模板切到 `custom`，再填写结果质量、修正池、目击次数、混乱与逃亡准备。
 
 如果直接运行脚本，也可以使用：
@@ -30,6 +31,8 @@ $py='..\..\.venv\Scripts\python.exe'
 ```powershell
 & $py src\the_unlisted\cli.py gui
 ```
+
+图形界面需要当前 Python 带有可用的 Tcl/Tk。若启动时报「缺少可用的 Tcl/Tk」，改用 conda 或官方安装版的 Python 运行同一条命令即可；剧本与结算引擎本身不依赖图形界面。
 
 ## 常用命令
 
@@ -41,6 +44,8 @@ $py='..\..\.venv\Scripts\python.exe'
 | `scene 3.1` | 查看具体场景的完整资料 |
 | `advance --scene 3.1 --quality 2` | 只推进到 3.1 并结算一次 |
 | `run --profile normal --seed 5` | 用预设玩家画像跑完整剧本 |
+| `finale` | 输出终局判定：谁在议程上、谁是替罪羊、那句话与事件定性 |
+| `finale --scene 4.1` | 只推进到 4.1 就做终局判定 |
 | `verify` | 回归验证四种画像的结局边界 |
 | `gui` | 打开本地图形化推演台 |
 
@@ -96,5 +101,6 @@ docs/
 3. 每个场景结束时只结算一次世界状态。
 4. 不记得名词时查 `roster.md`。
 5. 不确定引擎结果时运行 `verify`；不确定玩家后果时用 `advance --scene <ID>` 试算。
+6. 每一幕结束后可在「本场结算 → 终局判定」看到：按当前人类各派力量对比，谁会成为替罪羊、那句话怎么写、事件会被定性成什么。
 
 *运行方式与剧本内容均为虚构设定。*

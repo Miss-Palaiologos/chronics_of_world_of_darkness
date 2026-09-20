@@ -211,7 +211,7 @@ def render_act(
         zh_of = {x["id"]: x["zh"] for x in data.chronicle["world_state"]["variables"]}
         L.append("### 三根杠杆\n\n")
         L.append(f"{levers.get('rule', '')}\n\n")
-        for key in ("power", "scapegoat", "annex", "zone"):
+        for key in ("power", "scapegoat", "characterization", "annex", "zone"):
             lv = levers.get(key)
             if not lv:
                 continue
@@ -249,6 +249,10 @@ def render_act(
                         f"| **{street['who']}** | 「{street['line']}」 | {street['means']} | "
                         f"{street['why']} |\n\n"
                     )
+            elif key == "characterization":
+                L.append("| 条件 | 定性 | 这一行怎么写 |\n| --- | --- | --- |\n")
+                for row in lv["table"]:
+                    L.append(f"| {row['when']} | **{row['zh']}** | {row['text']} |\n")
             elif key == "annex":
                 L.append("| 谁在议程上 | 合法 | 怎么处理附则十九 | 结果 |\n| --- | --- | --- | --- |\n")
                 for h in lv["handlers"]:

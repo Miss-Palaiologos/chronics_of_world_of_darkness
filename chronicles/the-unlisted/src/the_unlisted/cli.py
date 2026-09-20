@@ -235,6 +235,42 @@ def _print_result(ch: Chronicle, res: Any) -> None:
         for n in res.notes:
             print(f"  · {n}")
 
+    _print_finale(ch, projection=True)
+
+
+def _print_finale(ch: Chronicle, projection: bool = False) -> None:
+    """把「谁在议程上／谁是替罪羊／事件如何被定性」打到主持人控制台。"""
+    r = ch.finale_resolution()
+    title = "【终局推演 · 若此刻收束】" if projection else "【终局判定】"
+    print(f"\n{title}")
+    print("  人类各派力量对比（能力 × 立场烈度 × 世界状态杠杆）：")
+    for row in r["agenda"]["table"]:
+        print(
+            f"    {row['zh']:<8}立场 {row['stance']:<8}合法能力 {row['legal']:<3}"
+            f"效果 {row['effect']:<7}"
+            + ("  ← 在议程上" if row["zh"] == r["agenda"]["zh"] else "")
+        )
+    sc = r["scapegoat"]
+    inst = r["institutional"]
+    print(f"\n  在议程上的阵营：{r['agenda']['zh']}（效果 {r['agenda']['effect']}）")
+    print(f"  制度侧提名（{inst['nominated_by']}）：{inst['who']}｜{inst['means']}")
+    print(f"    那句话：「{inst['line']}」")
+    if r["street_override"]:
+        print(
+            f"  ※ 街头否决生效：旧自由邦能力 {r['street_capability']}"
+            f" ≥ 制度侧赢家合法能力 {r['agenda']['legal']}。"
+        )
+        print(f"  最终写进《事件说明》第一条的人：{sc['who']}｜{sc['means']}")
+        print(f"    那句话：「{sc['line']}」")
+    else:
+        print(f"  最终写进《事件说明》第一条的人：{sc['who']}｜{sc['means']}")
+    print(f"  事件如何被定性：{r['characterization']['zh']}——{r['characterization']['text']}")
+    print(f"  附则十九由谁处理：{r['annex']['who']}（{r['annex']['how']}）")
+    print(f"  联合开发区条款：{r['zone']['result']}")
+    print(f"  逃亡准备：{r['escape']['value']}/3 → {r['escape']['text']}")
+    if r["collapse"]:
+        print(f"  >>> 崩盘轨道：{r['collapse']['zh']}——{r['collapse']['outcome']}")
+
 
 def cmd_run(args: argparse.Namespace) -> int:
     data = ChronicleData.load()
@@ -333,10 +369,67 @@ def cmd_verify(args: argparse.Namespace) -> int:
 
 
 def cmd_gui(args: argparse.Namespace) -> int:
-    from .gui import main as run_gui
-
-    run_gui()
+    try:
+        from .gui import main as run_gui
+    except ImportError as exc:  # pragma: no cover - 环境问题
+        print(f"无法载入图形界面：{exc}")
+        print("请确认当前 Python 带有 tkinter（conda / 官方安装版通常自带）。")
+        return 1
+    try:
+        run_gui()
+    except Exception as exc:  # tkinter.TclError 等
+        print(f"无法启动图形界面：{exc}")
+        print(
+            "当前 Python 缺少可用的 Tcl/Tk。可以改用命令行推演：\n"
+            "  python -m the_unlisted.cli advance --scene 3.1 --quality 2\n"
+            "  python -m the_unlisted.cli finale"
+        )
+        return 1
     return 0
+
+
+def cmd_finale(args: argparse.Namespace) -> int:
+    """只输出终局判定：谁在议程上、谁是替罪羊、事件如何被定性。"""
+    data = ChronicleData.load()
+    ch = Chronicle(data)
+    mods = _profile_player_mods(args.profile) if args.profile else PlayerMods()
+    if args.scene:
+        try:
+            target = data.acts().index(data.act(args.scene))
+        except (KeyError, IndexError):
+            raise SystemExit(f"未知场景：{args.scene}") from None
+        for i in range(target):
+            ch.act_cursor = i
+            res = ch.advance(mods)
+            if res.collapse:
+                break
+    else:
+        for i in range(len(data.acts())):
+            ch.act_cursor = i
+            res = ch.advance(mods)
+            if res.collapse:
+                break
+    print(f"当前局势：{_fmt_world(ch.world)}")
+    _print_finale(ch)
+    return 0
+
+
+def _profile_player_mods(profile: str) -> PlayerMods:
+    """把预设玩家画像换算成一次循环的修正池。"""
+    prof = PROFILES[profile]
+    quality = prof["quality"]
+    choices = [v for v in prof["prefer"] if v in WORLD_VARS] or ["order"]
+    alloc: dict[str, int] = {}
+    for i in range(quality * 2):
+        var = choices[i % len(choices)]
+        alloc[var] = alloc.get(var, 0) + 1
+    return PlayerMods(
+        outcome_quality=quality,
+        allocations=alloc,
+        witnessed_supernatural=prof["witnessed"],
+        escape_delta=prof["escape"],
+        agitation=prof["agitation"],
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -384,6 +477,21 @@ def build_parser() -> argparse.ArgumentParser:
 
     sp = sub.add_parser("gui", help="打开本地图形化推演界面")
     sp.set_defaults(func=cmd_gui)
+
+    sp = sub.add_parser("finale", help="输出终局判定（替罪羊、事件定性）")
+    sp.add_argument(
+        "--scene",
+        type=str,
+        default="",
+        help="只推进到该场景为止再判定；省略则跑完全剧",
+    )
+    sp.add_argument(
+        "--profile",
+        choices=sorted(PROFILES),
+        default="",
+        help="用预设玩家画像预演（省略则不做任何玩家修正）",
+    )
+    sp.set_defaults(func=cmd_finale)
     return p
 
 

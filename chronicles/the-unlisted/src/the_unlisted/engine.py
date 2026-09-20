@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import copy
 import math
+import re
 from dataclasses import dataclass, field
 from typing import Any, Iterable, Sequence
 
@@ -285,12 +286,141 @@ class Chronicle:
             ],
         }
 
-    def mortal_actions(self) -> list[str]:
-        """人类行动 = 态度（常量表） × 世界状态杠杆。"""
-        lines: list[str] = []
-        for fid, st in self.mortal.items():
-            lines.append(f"{st.zh}（{st.stance}）")
-        return lines
+    # ---- 终局判定 ------------------------------------------------------
+
+    def finale_resolution(self) -> dict[str, Any]:
+        """按当前局势推演终局：谁在议程上、替罪羊是谁、事件如何被定性。
+
+        规则全部来自 `data/acts/act-06.json` 的 `levers`：
+
+        - **谁在议程上** = 本幕人类行动效果最高者（能力 × 立场烈度 × 杠杆）。
+        - **替罪羊** = 制度侧赢家提名的那句话；若旧自由邦的能力 ≥ 赢家的合法能力，
+          街头否决生效，换成吴文辉那句。
+        - **事件定性** = 按世界状态依次取第一条命中的定性语气。
+
+        任何一幕结算后都可以调用它，用来告诉说书人此刻收束会落到哪里。
+        """
+        scenes = {a["id"]: a for a in self.data.acts()}
+        levers = scenes["6.1"].get("levers", {})
+        sc = levers.get("scapegoat", {})
+
+        ranked = sorted(self.mortal_actions(), key=lambda a: -a.effect)
+        winner = ranked[0]
+        narratives = {
+            n["nominated_by"]: n
+            for n in sc.get("institutional", {}).get("narratives", [])
+        }
+        nominated = narratives.get(winner.zh, {})
+
+        old_free = self.kindred["old_free"]
+        winner_legal = self.mortal[winner.faction_id].capability["legal"]
+        street = sc.get("street", {})
+        street_override = old_free.capability >= winner_legal
+        if street_override:
+            scapegoat = {
+                "who": street.get("who", "—"),
+                "nominated_by": "旧自由邦（街头否决）",
+                "line": street.get("line", ""),
+                "means": street.get("means", ""),
+                "why": street.get("why", ""),
+            }
+        else:
+            scapegoat = {
+                "who": nominated.get("who", "—"),
+                "nominated_by": winner.zh,
+                "line": nominated.get("line", ""),
+                "means": nominated.get("means", ""),
+                "why": nominated.get("why", ""),
+            }
+        institutional = {
+            "who": nominated.get("who", "—"),
+            "nominated_by": winner.zh,
+            "line": nominated.get("line", ""),
+            "means": nominated.get("means", ""),
+            "why": nominated.get("why", ""),
+        }
+
+        annex_lever = levers.get("annex", {})
+        annex_ranking = sorted(
+            self.mortal.values(),
+            key=lambda st: (-st.capability["legal"], st.faction_id != winner.faction_id),
+        )
+        annex_holder = annex_ranking[0]
+        annex = next(
+            (
+                h
+                for h in annex_lever.get("handlers", [])
+                if h["who"] == annex_holder.zh
+            ),
+            {},
+        )
+
+        zone_lever = levers.get("zone", {})
+        if old_free.capability >= 4:
+            zone = zone_lever.get("table", [{}])[0].get("result", "—")
+        elif old_free.capability == 3:
+            zone = zone_lever.get("table", [{}, {}])[1].get("result", "—")
+        else:
+            zone = zone_lever.get("table", [{}, {}, {}])[2].get("result", "—")
+
+        charac_lever = levers.get("characterization", {})
+        charac = None
+        for row in charac_lever.get("table", []):
+            if row.get("when") == "其他":
+                charac = charac or row
+                continue
+            if self._condition_hit(row.get("when", "")):
+                charac = row
+                break
+        charac = charac or {"zh": "—", "text": "—"}
+
+        return {
+            "agenda": {
+                "zh": winner.zh,
+                "stance": winner.stance,
+                "effect": winner.effect,
+                "legal": winner_legal,
+                "table": [
+                    {
+                        "zh": a.zh,
+                        "stance": a.stance,
+                        "effect": a.effect,
+                        "legal": self.mortal[a.faction_id].capability["legal"],
+                    }
+                    for a in ranked
+                ],
+            },
+            "scapegoat": scapegoat,
+            "institutional": institutional,
+            "street_override": street_override,
+            "street_capability": old_free.capability,
+            "street_rule": street.get("rule", ""),
+            "annex": {
+                "who": annex_holder.zh,
+                "legal": annex_holder.capability["legal"],
+                "how": annex.get("how", "—"),
+            },
+            "zone": {"who": "旧自由邦", "capability": old_free.capability, "result": zone},
+            "characterization": charac,
+            "collapse": self.check_collapse(),
+            "escape": {"value": self.escape_prep, "text": self.escape_outcome()},
+        }
+
+    def _condition_hit(self, when: str) -> bool:
+        """解析变体／定性条件，例如『暴露度 ≥ 8』『秩序 ≤ 3』。"""
+        match = re.search(r"(秩序|正当性|猎食条件|暴露度|资本信心)\s*([≤≥])\s*(\d+)", when)
+        if not match:
+            return False
+        var = {
+            "秩序": "order",
+            "正当性": "legitimacy",
+            "猎食条件": "feeding",
+            "暴露度": "exposure",
+            "资本信心": "capital",
+        }[match.group(1)]
+        value = self.world[var]
+        threshold = int(match.group(3))
+        return value <= threshold if match.group(2) == "≤" else value >= threshold
 
     # ---- 杠杆 ----------------------------------------------------------
 
