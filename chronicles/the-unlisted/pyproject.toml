@@ -1,6 +1,6 @@
 [project]
 name = "the-unlisted"
-version = "1.0.1"
+version = "1.0.2"
 description = "《不在册者》VTM V5 现代之夜编年史与局势引擎"
 readme = "README.md"
 requires-python = ">=3.14"

@@ -2,7 +2,7 @@
 
 | Chronicle / 编年史 | Folder / 目录 | Version / 版本 |
 | --- | --- | --- |
-| **The Unlisted / 《不在册者》** | `the-unlisted/` | `1.0.1` |
+| **The Unlisted / 《不在册者》** | `the-unlisted/` | `1.0.2` |
 
 Each chronicle is self-contained. Shared setting and writing references remain one level above in `../docs/` and `../reference/`.
 

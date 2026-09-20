@@ -125,9 +125,19 @@ def render_act(
             "**开场前读一遍世界状态，只应用命中的那几条。** "
             "没命中的不要提——玩家不需要知道自己错过了什么。\n\n"
         )
-        L.append("| 条件 | 改什么 | 改成 |\n| --- | --- | --- |\n")
+        L.append(
+            "| 条件 | 类型 | 含义 | 场景体现 | 玩家行为与难度 |\n"
+            "| --- | --- | --- | --- | --- |\n"
+        )
         for v in variants:
-            L.append(f"| {v['when']} | {v['kind']} | {v['text']} |\n")
+            effects = "；".join(
+                f"{e['behavior']}：{e['modifier']}（{e['why']}）"
+                for e in v.get("player_effects", [])
+            )
+            L.append(
+                f"| {v['when']} | {v['kind']} | {v.get('meaning', '')} | "
+                f"{v['text']} | {effects} |\n"
+            )
         L.append("\n")
 
     site = act.get("site")

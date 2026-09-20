@@ -179,17 +179,22 @@ class ChronicleGui:
         )
         self.next_variant_tree = ttk.Treeview(
             tab,
-            columns=("scene", "when", "text"),
+            columns=("scene", "when", "text", "effects"),
             show="headings",
             height=6,
         )
         for key, label, width in (
             ("scene", "场景", 90),
             ("when", "条件", 180),
-            ("text", "变体语句", 760),
+            ("text", "场景体现", 420),
+            ("effects", "玩家行为与难度", 520),
         ):
             self.next_variant_tree.heading(key, text=label)
-            self.next_variant_tree.column(key, width=width, anchor="center" if key != "text" else "w")
+            self.next_variant_tree.column(
+                key,
+                width=width,
+                anchor="center" if key in {"scene", "when"} else "w",
+            )
         self.next_variant_tree.tag_configure("triggered", foreground="#c62828")
         self.next_variant_tree.pack(fill="x", padx=8, pady=2)
 
@@ -489,10 +494,14 @@ class ChronicleGui:
             for s in next_group["scenes"]:
                 for v in s.get("variants", []):
                     triggered = variant_triggered(v["when"], self.ch.world)
+                    effects = "；".join(
+                        f"{e['behavior']}：{e['modifier']}"
+                        for e in v.get("player_effects", [])
+                    )
                     self.next_variant_tree.insert(
                         "",
                         "end",
-                        values=(scene_label(s), v["when"], v["text"]),
+                        values=(scene_label(s), v["when"], v["text"], effects),
                         tags=("triggered",) if triggered else (),
                     )
 

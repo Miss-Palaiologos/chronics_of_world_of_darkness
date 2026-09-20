@@ -20,17 +20,74 @@
         {
           "when": "秩序 ≤ 5",
           "kind": "场景",
-          "text": "守夜的人比原计划多了一倍——因为前三天已经有别的街区开始有人坐着了。这件事没有人组织。"
+          "text": "守夜的人比原计划多了一倍——因为前三天已经有别的街区开始有人坐着了。这件事没有人组织。",
+          "meaning": "政府控制正在减弱，群众开始自行聚集。",
+          "scene_effect": "守夜人数翻倍，但没有人明确组织这件事。",
+          "player_effects": [
+            {
+              "behavior": "穿过人群并隐藏身份",
+              "modifier": "Dexterity + Stealth 难度 +1",
+              "why": "密集人群既遮挡视线，也增加被记住的机会"
+            },
+            {
+              "behavior": "在人群中狩猎",
+              "modifier": "Wits + Streetwise 难度 −1",
+              "why": "情绪和血液密度提高，但目击风险上升"
+            },
+            {
+              "behavior": "劝散守夜人群",
+              "modifier": "Charisma + Leadership 难度 +2",
+              "why": "人群不是在等命令，而是在等一个说法"
+            }
+          ]
         },
         {
           "when": "暴露度 ≥ 4",
           "kind": "人物",
-          "text": "街垒今晚只来了两个人，而且没有穿标志色。何家树把手插在口袋里，一直在看自己的鞋。"
+          "text": "街垒今晚只来了两个人，而且没有穿标志色。何家树把手插在口袋里，一直在看自己的鞋。",
+          "meaning": "血族已经开始避免留下集体身份和公开记录。",
+          "scene_effect": "街垒只来两个人，没有穿标志色。",
+          "player_effects": [
+            {
+              "behavior": "识别街垒成员",
+              "modifier": "Wits + Awareness 难度 −1",
+              "why": "熟悉运动圈的人能看出他们的姿态"
+            },
+            {
+              "behavior": "从他们口中问出真实立场",
+              "modifier": "Manipulation + Insight 难度 +1",
+              "why": "他们不愿意在公开场合暴露自己"
+            },
+            {
+              "behavior": "迫使街垒公开站队",
+              "modifier": "暴露度 +1",
+              "why": "公开站队会让在场血族一起被记录"
+            }
+          ]
         },
         {
           "when": "猎食条件 ≥ 7",
           "kind": "场景",
-          "text": "那条街上有三个血族在猎食，而他们彼此都看得见——猎食条件太好的时候，克制是奢侈品。"
+          "text": "那条街上有三个血族在猎食，而他们彼此都看得见——猎食条件太好的时候，克制是奢侈品。",
+          "meaning": "这一晚的血液密度足以吸引多个血族同时猎食。",
+          "scene_effect": "三名血族都在同一条街附近，彼此能感觉到对方。",
+          "player_effects": [
+            {
+              "behavior": "寻找猎物",
+              "modifier": "Wits + Streetwise 难度 −1",
+              "why": "人群情绪浓、遮掩多，狩猎条件极好"
+            },
+            {
+              "behavior": "争夺同一猎物",
+              "modifier": "Manipulation 或 Strength + Intimidation 难度 +1",
+              "why": "在场者不愿放弃已经选定的目标"
+            },
+            {
+              "behavior": "抵抗饥渴或愤怒狂乱",
+              "modifier": "Resolve + Composure 难度 +1",
+              "why": "竞争和血腥味同时提高失控风险"
+            }
+          ]
         }
       ],
       "truth": {
@@ -323,17 +380,74 @@
         {
           "when": "正当性 ≤ 4",
           "kind": "场景",
-          "text": "旁听席站满了，法院临时开了第二个房间做视频转播，而那个房间也满了。"
+          "text": "旁听席站满了，法院临时开了第二个房间做视频转播，而那个房间也满了。",
+          "meaning": "公众不再相信制度能够代表他们。",
+          "scene_effect": "旁听席挤满，法院临时开放第二房间转播。",
+          "player_effects": [
+            {
+              "behavior": "控制旁听席或压住记者",
+              "modifier": "Charisma + Leadership 难度 +2",
+              "why": "所有人都知道自己正在被围观"
+            },
+            {
+              "behavior": "利用程序漏洞",
+              "modifier": "Politics + Academics（Law）难度 −1",
+              "why": "制度越紧张，程序缝隙越明显"
+            },
+            {
+              "behavior": "在公开场合使用律能",
+              "modifier": "暴露度 +1",
+              "why": "人群和镜头都在场"
+            }
+          ]
         },
         {
           "when": "资本信心 ≤ 4",
           "kind": "人物",
-          "text": "联合机构换了代表。来的是一个更年轻、更硬的律师——上一次的妥协被认为代价太高。"
+          "text": "联合机构换了代表。来的是一个更年轻、更硬的律师——上一次的妥协被认为代价太高。",
+          "meaning": "资本和机构开始认为继续妥协不划算。",
+          "scene_effect": "联合机构换上更硬的律师，上一次妥协被视为代价过高。",
+          "player_effects": [
+            {
+              "behavior": "用钱或关系影响机构",
+              "modifier": "Resources 或 Influence 难度 +1",
+              "why": "机构正在收紧风险敞口"
+            },
+            {
+              "behavior": "把问题拖延成程序问题",
+              "modifier": "Politics + Academics（Law）难度 −1",
+              "why": "制度越僵硬，程序拖延越有效"
+            },
+            {
+              "behavior": "安排律师或资源支援",
+              "modifier": "准备时间 +1",
+              "why": "资源变贵，行动速度下降"
+            }
+          ]
         },
         {
           "when": "暴露度 ≥ 5",
           "kind": "节拍",
-          "text": "张佳琳在走廊里问了一个不该问的问题：**那两百页里，有没有不是关于水的部分？** 没有人回答，而她把这个问题记了下来。"
+          "text": "张佳琳在走廊里问了一个不该问的问题：**那两百页里，有没有不是关于水的部分？** 没有人回答，而她把这个问题记了下来。",
+          "meaning": "已经有人在把公开文件与血族秘密连接起来。",
+          "scene_effect": "张佳琳问出那个问题：那两百页里，有没有不是关于水的部分？",
+          "player_effects": [
+            {
+              "behavior": "掩盖档案中的血族部分",
+              "modifier": "Manipulation + Subterfuge 难度 +1",
+              "why": "提问者已经开始追踪文件结构"
+            },
+            {
+              "behavior": "引导记者继续追查",
+              "modifier": "Manipulation + Subterfuge 难度 −1，暴露度 +1",
+              "why": "让她继续查会带来曝光，也会带来真相"
+            },
+            {
+              "behavior": "让她触碰血族真相",
+              "modifier": "审判庭线索 +1",
+              "why": "信息一旦进入人类记录，就撤不回来"
+            }
+          ]
         }
       ],
       "truth": {

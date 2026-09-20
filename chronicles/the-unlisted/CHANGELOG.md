@@ -1,5 +1,19 @@
 # Changelog / 版本记录
 
+## [1.0.2] - 2026-09-20
+
+### English
+
+- Added explicit meaning, scene expression, player behavior, and difficulty effects to every variant entry.
+- Replaced loose terms with V5 skills and backgrounds such as Politics, Academics (Law), Resources, Influence, Leadership, Subterfuge, Stealth, and Investigation.
+- Updated generated act documents and the GUI variant table to show the new mechanics.
+
+### 中文
+
+- 为每个变体词条补充明确的世界含义、场景体现、玩家行为与难度影响。
+- 将“官僚”“资源”等松散说法替换为 V5 技能与背景，例如 Politics、Academics（Law）、Resources、Influence、Leadership、Subterfuge、Stealth、Investigation。
+- 生成幕文档与 GUI 变体表同步展示新机制。
+
 ## [1.0.1] - 2026-09-20
 
 ### English
