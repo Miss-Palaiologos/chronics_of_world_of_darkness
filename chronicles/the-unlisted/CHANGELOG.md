@@ -1,5 +1,23 @@
 # Changelog / 版本记录
 
+## [1.0.5] - 2026-09-20
+
+### English
+
+- Tuned the finale so the Sovereign and Unionist blocs are genuinely close: their baseline capability is now equal, the capital-confidence lever is ×1.2 instead of ×1.5, and the top-two gap at 6.1 is about 0.8 of a legal-capability step. One deal can flip the agenda.
+- Moved the human lever table and the tie-break rule into `data/mortal.json`; the engine now reads them instead of hardcoding the multipliers. Ties go to the faction that writes the treaty down first (Technocrats > Unionists > Sovereignists).
+- Turned the trusteeship archive's destination into a dropdown: it follows the default world line act by act, can be overridden by the table, and the override applies that destination's world and kindred effects.
+- Added the `balance` command for debugging the human agenda table, and `--archive` / `--archive-no-effect` on `advance` and `finale`.
+- Added a human legal-capability control to the GUI, since the ±1 deal is the only direct lever players have on the final vote.
+
+### 中文
+
+- 调试终局悬念：主权派与联盟派基线能力拉平，资本信心杠杆由 ×1.5 降为 ×1.2，6.1 前两名差距通常只有约 0.8 格合法能力——一次密室交易就能翻盘。
+- 人类杠杆表与平局规则移入 `data/mortal.json`，引擎直接读取，不再写死在代码里；平局判给先把条约写下来的一方（技术官僚派 ＞ 联盟派 ＞ 主权派）。
+- 托管档案去向改为下拉框：逐幕跟随默认世界线，可手动覆盖，覆盖时按去向表计入世界状态与血族能力。
+- 新增 `balance` 调试命令，以及 `advance`／`finale` 的 `--archive`、`--archive-no-effect` 参数。
+- 界面新增「人类阵营合法能力修正」，因为 ±1 的密室交易是玩家影响最终投票的唯一直接杠杆。
+
 ## [1.0.4] - 2026-09-20
 
 ### English

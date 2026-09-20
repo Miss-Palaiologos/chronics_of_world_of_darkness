@@ -204,6 +204,7 @@ class Chronicle:
         self.archive_location: str = data.chronicle["world_state"]["discrete"][
             "archive_location"
         ]["initial"]
+        self.archive_manual: bool = False
         self.hunting_grounds: dict[str, str] = {
             k: v["initial"]
             for k, v in data.chronicle["world_state"]["discrete"]["hunting_grounds"][
@@ -254,6 +255,67 @@ class Chronicle:
                 capability=cap,
             )
 
+    def _sync_archive(self, act_id: str) -> None:
+        """默认世界线决定档案本来在哪；主持人一旦改过，就以改动为准。"""
+        if not self.archive_manual:
+            self.archive_location = (
+                self.data.archive_default_line.get(act_id) or self.archive_location
+            )
+
+    # ---- 关键道具：托管档案去向 ----------------------------------------
+
+    def archive_default_for(self, act_id: str) -> str:
+        return self.data.archive_default_line.get(act_id, self.archive_location)
+
+    def archive_report(self) -> dict[str, Any]:
+        opt = next(
+            (o for o in self.data.archive_options if o["id"] == self.archive_location),
+            {},
+        )
+        return {
+            "id": self.archive_location,
+            "zh": self.data.archive_label(self.archive_location),
+            "default": self.archive_default_for(self.current_act_id()),
+            "default_zh": self.data.archive_label(
+                self.archive_default_for(self.current_act_id())
+            ),
+            "manual": self.archive_manual,
+            "delta": dict(opt.get("delta", {})),
+            "kindred_delta": dict(opt.get("kindred_delta", {})),
+            "note": opt.get("note", ""),
+        }
+
+    def set_archive_location(self, value: str, apply_delta: bool = True) -> dict[str, Any]:
+        """把托管档案改成另一种去向。这是玩家唯一能直接拿到的东西。
+
+        默认值按默认世界线走（`props.json` 的 `default_line`）；
+        主持人或玩家一旦改动，改动会保留，并按去向表立刻计入世界状态。
+        """
+        ids = {o["id"] for o in self.data.archive_options}
+        if value not in ids:
+            raise KeyError(f"未知的档案去向：{value}（可用：{', '.join(sorted(ids))}）")
+        before = self.archive_location
+        self.archive_location = value
+        self.archive_manual = True
+        report = self.archive_report()
+        report["before"] = before
+        report["applied"] = False
+        if apply_delta:
+            delta = report["delta"]
+            if delta:
+                self.change_world(**delta)
+            for fid, dv in report["kindred_delta"].items():
+                if fid in self.kindred:
+                    self.change_kindred(fid, capability_delta=int(dv))
+            report["applied"] = True
+            report["world"] = dict(self.world)
+        return report
+
+    def reset_archive_to_default(self) -> dict[str, Any]:
+        self.archive_manual = False
+        self._sync_archive(self.current_act_id())
+        return self.archive_report()
+
     def change_mortal_capability(self, faction_id: str, delta: int) -> dict[str, Any]:
         """玩家通过密室交易抬高或压低一个人类阵营的制度能力。
 
@@ -274,7 +336,8 @@ class Chronicle:
     def agenda_holder(self) -> dict[str, Any]:
         """谁在议程上 ＝ 本幕行动效果最高的制度阵营。"""
         acts = self.mortal_actions()
-        best = max(acts, key=lambda a: a.effect)
+        ranked = sorted(acts, key=self._rank_key)
+        best = ranked[0]
         return {
             "faction": best.faction_id,
             "zh": best.zh,
@@ -282,8 +345,9 @@ class Chronicle:
             "effect": best.effect,
             "table": [
                 {"zh": a.zh, "effect": a.effect, "capability": a.capability_score}
-                for a in sorted(acts, key=lambda a: -a.effect)
+                for a in ranked
             ],
+            "tie": len(ranked) > 1 and abs(ranked[0].effect - ranked[1].effect) < 1e-9,
         }
 
     # ---- 终局判定 ------------------------------------------------------
@@ -304,7 +368,7 @@ class Chronicle:
         levers = scenes["6.1"].get("levers", {})
         sc = levers.get("scapegoat", {})
 
-        ranked = sorted(self.mortal_actions(), key=lambda a: -a.effect)
+        ranked = sorted(self.mortal_actions(), key=self._rank_key)
         winner = ranked[0]
         narratives = {
             n["nominated_by"]: n
@@ -380,12 +444,16 @@ class Chronicle:
                 "stance": winner.stance,
                 "effect": winner.effect,
                 "legal": winner_legal,
+                "tie": len(ranked) > 1
+                and abs(ranked[0].effect - ranked[1].effect) < 1e-9,
+                "tie_rule": self.data.mortal.get("tie_break", {}).get("rule", ""),
                 "table": [
                     {
                         "zh": a.zh,
                         "stance": a.stance,
                         "effect": a.effect,
                         "legal": self.mortal[a.faction_id].capability["legal"],
+                        "capability_score": a.capability_score,
                     }
                     for a in ranked
                 ],
@@ -402,6 +470,7 @@ class Chronicle:
             },
             "zone": {"who": "旧自由邦", "capability": old_free.capability, "result": zone},
             "characterization": charac,
+            "archive": self.archive_report(),
             "collapse": self.check_collapse(),
             "escape": {"value": self.escape_prep, "text": self.escape_outcome()},
         }
@@ -471,26 +540,26 @@ class Chronicle:
     # ---- 人类行动 ------------------------------------------------------
 
     def mortal_levers(self, faction_id: str) -> tuple[float, list[str]]:
-        """人类行动的世界状态杠杆。"""
+        """人类行动的世界状态杠杆。杠杆表来自 mortal.json，不写死在代码里。"""
         factor = 1.0
         applied: list[str] = []
-        w = self.world
-        if w["legitimacy"] <= 3 and faction_id in ("sovereign", "union"):
-            factor *= 1.5
-            applied.append("正当性≤3：主权派与联盟派 ×1.5（两边都更容易动员）")
-        if w["order"] <= 3 and faction_id == "continuity":
-            factor *= 0.5
-            applied.append("秩序≤3：技术官僚派 ×0.5（国家自己都乱了，管不了）")
-        if w["capital"] <= 3 and faction_id == "union":
-            factor *= 1.5
-            applied.append("资本信心≤3：联盟派 ×1.5（『我们别无选择』变得可信）")
-        if w["capital"] >= 7 and faction_id == "sovereign":
-            factor *= 1.5
-            applied.append("资本信心≥7：主权派 ×1.5（『我们撑得住』变得可信）")
-        if w["exposure"] >= 7:
-            factor *= 1.5
-            applied.append("暴露度≥7：全体人类 ×1.5（人人紧张，任何事都更容易引爆）")
+        for row in self.data.mortal_lever_rows:
+            targets = row.get("applies_to", [])
+            if "*" not in targets and faction_id not in targets:
+                continue
+            if not self._condition_hit(row.get("when", "")):
+                continue
+            factor *= float(row["factor"])
+            applied.append(row["why"])
         return factor, applied
+
+    def _rank_key(self, effect: MortalEffect) -> tuple[float, int, str]:
+        """排序：先看行动效果，平局看平局优先级（数据里定义），最后按 id 稳定排序。"""
+        return (
+            -effect.effect,
+            self.data.mortal_tie_priority.get(effect.faction_id, 99),
+            effect.faction_id,
+        )
 
     def mortal_actions(self) -> list[MortalEffect]:
         """人类行动效果 = 立场烈度 × 能力 × 世界状态杠杆。
@@ -619,6 +688,8 @@ class Chronicle:
         act_id = act["id"]
         # 人类立场按阶段重载：这是"历史大势"，每幕跳到下一列，不因玩家而改变。
         self._sync_mortal(act_id)
+        # 托管档案默认按默认世界线走；主持人改过就以改动为准。
+        self._sync_archive(act_id)
         before = dict(self.world)
         kindred_before = {
             fid: {
@@ -883,7 +954,11 @@ class Chronicle:
             "inquisition": w["exposure"] >= 10,
             "capital_collapse": w["capital"] <= 1,
         }
-        for track in self.data.collapse_tracks:
+        tracks = list(self.data.collapse_tracks)
+        if w["exposure"] >= 10:
+            # 暴露度破表时，审判庭永远是第一叙事：把档案交出去就该看见这一条。
+            tracks.sort(key=lambda t: 0 if t["id"] == "inquisition" else 1)
+        for track in tracks:
             if checks.get(track["id"]):
                 return track
         return None
@@ -982,6 +1057,8 @@ class Chronicle:
             "act": self.current_act_id(),
             "world": dict(self.world),
             "archive_location": self.archive_location,
+            "archive_zh": self.data.archive_label(self.archive_location),
+            "archive_manual": self.archive_manual,
             "hunting_grounds": dict(self.hunting_grounds),
             "kindred": {
                 fid: {

@@ -101,6 +101,50 @@ def cmd_check(args: argparse.Namespace) -> int:
             print(f"  {where} -> {cid}")
         return 1
     print("\n所有人物 id 均可解析。")
+    prop_ids = {o["id"] for o in data.archive_options}
+    chron_ids = {
+        o["id"]
+        for o in data.chronicle["world_state"]["discrete"]["archive_location"][
+            "options"
+        ]
+    }
+    if prop_ids != chron_ids:
+        print("\n档案去向 id 不同步：")
+        print(f"  props.json：{sorted(prop_ids)}")
+        print(f"  chronicle.json：{sorted(chron_ids)}")
+        return 1
+    print(f"档案去向 {len(prop_ids)} 项，props.json 与 chronicle.json 同步。")
+    return 0
+
+
+def cmd_balance(args: argparse.Namespace) -> int:
+    """打印每一幕的人类议程表与前两名差距，用来调试最后一场的悬念。"""
+    data = ChronicleData.load()
+    ch = Chronicle(data)
+    mods = _profile_player_mods(args.profile) if args.profile else PlayerMods()
+    print(f"{'幕':<6}{'在议程上':<10}{'第一名':>8}{'第二名':>8}{'差距':>8}  说明")
+    for i, act in enumerate(data.acts()):
+        ch.act_cursor = i
+        res = ch.advance(mods)
+        ag = ch.agenda_holder()
+        table = ag["table"]
+        first, second = table[0], table[1]
+        gap = first["effect"] - second["effect"]
+        if abs(gap) < 1e-9:
+            tail = "同分 → 平局判定"
+        else:
+            step = first["effect"] / first["capability"] if first["capability"] else 0
+            tail = f"≈{gap / step:.1f} 格合法能力" if step else "—"
+        print(
+            f"{act['id']:<6}{ag['zh']:<10}{first['effect']:>8.2f}{second['effect']:>8.2f}"
+            f"{gap:>8.2f}  {tail}"
+        )
+        if res.collapse:
+            print(f"      >>> 崩盘：{res.collapse['zh']}（后续幕不再结算）")
+            break
+    print("\n托管档案默认世界线：")
+    for act_id, oid in data.archive_default_line.items():
+        print(f"  {act_id} → {data.archive_label(oid)}")
     return 0
 
 
@@ -160,6 +204,11 @@ def cmd_advance(args: argparse.Namespace) -> int:
         ch.act_cursor = i
         ch.advance(PlayerMods())
     ch.act_cursor = target
+    if args.archive:
+        report = ch.set_archive_location(
+            args.archive, apply_delta=not args.archive_no_effect
+        )
+        print(f"托管档案去向：{report['zh']}（{report['before']} → {report['id']}）")
     mods = PlayerMods(
         outcome_quality=args.quality,
         allocations=_parse_alloc(args.alloc),
@@ -253,6 +302,24 @@ def _print_finale(ch: Chronicle, projection: bool = False) -> None:
     sc = r["scapegoat"]
     inst = r["institutional"]
     print(f"\n  在议程上的阵营：{r['agenda']['zh']}（效果 {r['agenda']['effect']}）")
+    table = r["agenda"]["table"]
+    if len(table) > 1:
+        gap = table[0]["effect"] - table[1]["effect"]
+        step = (
+            table[0]["effect"] / table[0]["capability_score"]
+            if table[0]["capability_score"]
+            else 0.0
+        )
+        if abs(gap) < 1e-9:
+            print(
+                f"  前两名完全同分：{table[0]['zh']} 与 {table[1]['zh']}"
+                "——按平局判定，条约先被写下来的一方胜。"
+            )
+        elif step:
+            print(
+                f"  前两名差距：{gap:.2f} ≈ {gap / step:.1f} 格合法能力"
+                f"（{table[0]['zh']} vs {table[1]['zh']}）"
+            )
     print(f"  制度侧提名（{inst['nominated_by']}）：{inst['who']}｜{inst['means']}")
     print(f"    那句话：「{inst['line']}」")
     if r["street_override"]:
@@ -267,6 +334,18 @@ def _print_finale(ch: Chronicle, projection: bool = False) -> None:
     print(f"  事件如何被定性：{r['characterization']['zh']}——{r['characterization']['text']}")
     print(f"  附则十九由谁处理：{r['annex']['who']}（{r['annex']['how']}）")
     print(f"  联合开发区条款：{r['zone']['result']}")
+    arc = r["archive"]
+    flag = (
+        f"手动指定；默认世界线为 {arc['default_zh']}"
+        if arc["manual"]
+        else "默认世界线"
+    )
+    print(f"  托管档案去向：{arc['zh']}　[{flag}]")
+    if arc["delta"]:
+        cells = "　".join(
+            f"{VAR_ZH.get(k, k)} {v:+d}" for k, v in arc["delta"].items()
+        )
+        print(f"    该去向的世界影响：{cells}")
     print(f"  逃亡准备：{r['escape']['value']}/3 → {r['escape']['text']}")
     if r["collapse"]:
         print(f"  >>> 崩盘轨道：{r['collapse']['zh']}——{r['collapse']['outcome']}")
@@ -393,6 +472,9 @@ def cmd_finale(args: argparse.Namespace) -> int:
     data = ChronicleData.load()
     ch = Chronicle(data)
     mods = _profile_player_mods(args.profile) if args.profile else PlayerMods()
+    if args.archive:
+        # 只记录去向、推迟到判定前再计入影响，避免把影响压在整条时间线开头。
+        ch.set_archive_location(args.archive, apply_delta=False)
     if args.scene:
         try:
             target = data.acts().index(data.act(args.scene))
@@ -409,6 +491,9 @@ def cmd_finale(args: argparse.Namespace) -> int:
             res = ch.advance(mods)
             if res.collapse:
                 break
+    if args.archive:
+        # 判定前把该去向的世界影响落在当前局势上。
+        ch.set_archive_location(args.archive, apply_delta=True)
     print(f"当前局势：{_fmt_world(ch.world)}")
     _print_finale(ch)
     return 0
@@ -454,6 +539,17 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--witnessed", type=int, default=0, help="超自然能力被目击次数")
     sp.add_argument("--escape", type=int, default=0, help="本幕提升的逃亡准备")
     sp.add_argument("--agitation", type=int, default=0, help="本幕玩家制造的混乱 0–3（秩序−n，暴露度+n）")
+    sp.add_argument(
+        "--archive",
+        type=str,
+        default="",
+        help="结算前指定托管档案去向（players 唯一能直接拿到的东西）",
+    )
+    sp.add_argument(
+        "--archive-no-effect",
+        action="store_true",
+        help="只记录档案去向，不把该去向的世界影响计入结算",
+    )
     sp.set_defaults(func=cmd_advance)
 
     sp = sub.add_parser("run", help="跑完整个剧本")
@@ -470,6 +566,15 @@ def build_parser() -> argparse.ArgumentParser:
 
     sp = sub.add_parser("render", help="从 data/ 生成 docs/")
     sp.set_defaults(func=cmd_render)
+
+    sp = sub.add_parser("balance", help="调试用：逐幕打印人类议程表与前两名差距")
+    sp.add_argument(
+        "--profile",
+        choices=sorted(PROFILES),
+        default="",
+        help="用预设玩家画像预演（省略则不做任何玩家修正）",
+    )
+    sp.set_defaults(func=cmd_balance)
 
     sp = sub.add_parser("verify", help="运行四种玩家档案做回归验证")
     sp.add_argument("--seed", type=int, default=5)
@@ -490,6 +595,12 @@ def build_parser() -> argparse.ArgumentParser:
         choices=sorted(PROFILES),
         default="",
         help="用预设玩家画像预演（省略则不做任何玩家修正）",
+    )
+    sp.add_argument(
+        "--archive",
+        type=str,
+        default="",
+        help="判定前指定托管档案去向",
     )
     sp.set_defaults(func=cmd_finale)
     return p

@@ -98,6 +98,9 @@ class ChronicleGui:
         self.faction_patience = tk.IntVar(value=0)
         self.faction_capability = tk.IntVar(value=0)
         self.faction_stance = tk.StringVar(value="不改变")
+        self.archive_choice = tk.StringVar()
+        self.archive_apply_effect = tk.BooleanVar(value=True)
+        self.archive_text = tk.StringVar()
         self.custom_quality = tk.IntVar(value=2)
         self.custom_witnessed = tk.IntVar(value=0)
         self.custom_agitation = tk.IntVar(value=0)
@@ -131,6 +134,9 @@ class ChronicleGui:
             mode="determinate",
         )
         self.escape_bar.pack(side="left", padx=(10, 0))
+        ttk.Label(
+            progress_row, textvariable=self.archive_text, font=("", 11, "bold")
+        ).pack(side="left", padx=(24, 0))
 
         state_frame = ttk.LabelFrame(self.root, text="当前世界状态", padding=8)
         state_frame.pack(fill="x", padx=14, pady=(0, 8))
@@ -173,7 +179,7 @@ class ChronicleGui:
         manual_tab = ttk.Frame(notebook)
         notebook.add(home_tab, text="当前局面")
         notebook.add(result_tab, text="本场结算")
-        notebook.add(manual_tab, text="手动修正／自定义行动")
+        notebook.add(manual_tab, text="道具与手动修正")
 
         self._build_home_tab(home_tab)
         self._build_result_tab(result_tab)
@@ -315,6 +321,42 @@ class ChronicleGui:
     def _build_manual_tab(self, tab: ttk.Frame) -> None:
         pad = {"padx": 10, "pady": 8}
 
+        archive_box = ttk.LabelFrame(
+            tab, text="关键道具 · 托管档案去向（玩家唯一能直接摸到的东西）", padding=10
+        )
+        archive_box.pack(fill="x", **pad)
+        self.archive_combo = ttk.Combobox(
+            archive_box,
+            state="readonly",
+            width=34,
+            values=[
+                f"{o['id']}｜{o['action']}" for o in self.data.archive_options
+            ],
+            textvariable=self.archive_choice,
+        )
+        self.archive_combo.grid(row=0, column=0, padx=(0, 10), sticky="w")
+        self.archive_combo.bind("<<ComboboxSelected>>", lambda _e: self._archive_preview())
+        ttk.Checkbutton(
+            archive_box,
+            text="同时计入该去向的世界影响",
+            variable=self.archive_apply_effect,
+        ).grid(row=0, column=1, padx=(0, 10))
+        ttk.Button(archive_box, text="应用去向", command=self._apply_archive).grid(
+            row=0, column=2, padx=(0, 8)
+        )
+        ttk.Button(
+            archive_box, text="恢复默认世界线", command=self._reset_archive
+        ).grid(row=0, column=3)
+        self.archive_default_label = tk.StringVar()
+        ttk.Label(archive_box, textvariable=self.archive_default_label).grid(
+            row=1, column=0, columnspan=4, sticky="w", pady=(8, 0)
+        )
+        self.archive_preview = ScrolledText(
+            archive_box, wrap="word", height=4, font=("", 10)
+        )
+        self.archive_preview.grid(row=2, column=0, columnspan=4, sticky="ew", pady=(6, 0))
+        archive_box.columnconfigure(0, weight=1)
+
         world_box = ttk.LabelFrame(tab, text="世界状态修正", padding=10)
         world_box.pack(fill="x", **pad)
         for col, var in enumerate(WORLD_VARS):
@@ -341,6 +383,31 @@ class ChronicleGui:
             world_box,
             text="世界状态输入的是增量；应用后会清零。逃亡准备输入的是当前绝对值。",
         ).grid(row=2, column=0, columnspan=7, sticky="w", pady=(8, 0))
+
+        mortal_box = ttk.LabelFrame(
+            tab, text="人类阵营合法能力修正（密室交易 · 决定谁在议程上）", padding=10
+        )
+        mortal_box.pack(fill="x", **pad)
+        mortal_labels = [
+            f"{f['id']}｜{f['zh']}" for f in self.data.mortal["factions"]
+        ]
+        self.mortal_combo = ttk.Combobox(
+            mortal_box, state="readonly", values=mortal_labels, width=22
+        )
+        self.mortal_combo.set(mortal_labels[0])
+        self.mortal_combo.grid(row=0, column=0, padx=(0, 8))
+        ttk.Label(mortal_box, text="合法能力 ±1").grid(row=0, column=1, padx=4)
+        self.mortal_delta = tk.IntVar(value=0)
+        ttk.Spinbox(
+            mortal_box, from_=-1, to=1, textvariable=self.mortal_delta, width=4
+        ).grid(row=0, column=2)
+        ttk.Button(mortal_box, text="应用", command=self._apply_mortal_capability).grid(
+            row=0, column=3, padx=12
+        )
+        self.mortal_note = tk.StringVar()
+        ttk.Label(
+            mortal_box, textvariable=self.mortal_note, foreground="#666666"
+        ).grid(row=1, column=0, columnspan=4, sticky="w", pady=(8, 0))
 
         faction_box = ttk.LabelFrame(tab, text="派系状态修正", padding=10)
         faction_box.pack(fill="x", **pad)
@@ -437,7 +504,80 @@ class ChronicleGui:
         self.escape_text.set(
             f"逃亡准备：{self.ch.escape_prep}/3（存活门槛 {threshold}，{mark}）"
         )
+        arc = self.ch.archive_report()
+        flag = "手动指定" if arc["manual"] else f"默认世界线：{arc['default_zh']}"
+        self.archive_text.set(f"托管档案：{arc['zh']}（{flag}）")
+        self._sync_archive_widgets()
+        self._sync_mortal_widgets()
         self._render_home()
+
+    # ---- 关键道具：托管档案 ----------------------------------------------
+
+    def _sync_archive_widgets(self) -> None:
+        arc = self.ch.archive_report()
+        current = next(
+            (o for o in self.data.archive_options if o["id"] == arc["id"]), None
+        )
+        if current:
+            self.archive_choice.set(f"{current['id']}｜{current['action']}")
+        self.archive_default_label.set(
+            f"默认世界线（第 {self.data.group(self.ch.current_act()['act'])['act']} 幕）："
+            f"{arc['default_zh']}　—— 只要不手动改动，引擎就按它走，且不额外计入数值；"
+            "手动改动才把该去向的世界影响算进来。"
+        )
+        self._archive_preview()
+
+    def _selected_archive_option(self) -> dict:
+        raw = self.archive_choice.get()
+        aid = raw.split("｜", 1)[0] if raw else ""
+        return next(
+            (o for o in self.data.archive_options if o["id"] == aid), {}
+        )
+
+    def _archive_preview(self) -> None:
+        opt = self._selected_archive_option()
+        self.archive_preview.delete("1.0", "end")
+        if not opt:
+            return
+        delta = opt.get("delta", {})
+        cells = "　".join(
+            f"{VAR_ZH.get(k, k)} {v:+d}" for k, v in delta.items()
+        ) or "无世界状态变化"
+        lines = [
+            f"{opt['id']}｜{opt['action']}",
+            f"世界影响：{cells}",
+        ]
+        kd = opt.get("kindred_delta", {})
+        if kd:
+            lines.append(
+                "血族影响："
+                + "　".join(
+                    f"{self.data.kindred_factions[f]['zh']} 能力 {v:+d}"
+                    for f, v in kd.items()
+                )
+            )
+        if opt.get("note"):
+            lines.append(opt["note"])
+        self.archive_preview.insert("end", "\n".join(lines) + "\n")
+
+    def _apply_archive(self) -> None:
+        opt = self._selected_archive_option()
+        if not opt:
+            self._status("先选一个档案去向。")
+            return
+        report = self.ch.set_archive_location(
+            opt["id"], apply_delta=self.archive_apply_effect.get()
+        )
+        applied = "已计入世界影响" if report["applied"] else "未计入影响（只记录去向）"
+        self._refresh()
+        self._render_finale()
+        self._status(f"托管档案 → {report['zh']}（{applied}）")
+
+    def _reset_archive(self) -> None:
+        report = self.ch.reset_archive_to_default()
+        self._refresh()
+        self._render_finale()
+        self._status(f"托管档案回到默认世界线：{report['zh']}")
 
     def _mods(self) -> PlayerMods:
         if self.profile.get() == "custom":
@@ -577,8 +717,20 @@ class ChronicleGui:
             "",
             f"附则十九由谁处理：{r['annex']['who']}（{r['annex']['how']}）",
             f"联合开发区条款：{r['zone']['result']}",
+            f"托管档案去向：{r['archive']['zh']}"
+            + (
+                f"（手动指定；默认世界线：{r['archive']['default_zh']}）"
+                if r["archive"]["manual"]
+                else "（默认世界线）"
+            ),
             f"逃亡准备：{r['escape']['value']}/3 → {r['escape']['text']}",
         ]
+        if r["agenda"]["tie"]:
+            lines.insert(
+                1,
+                "※ 主权派与联盟派效果相同——按平局判定："
+                "条约先被写下来，所以联盟派优先。",
+            )
         if r["collapse"]:
             lines += [
                 "",
@@ -701,6 +853,35 @@ class ChronicleGui:
         self._refresh()
         self._render_finale()
         self._status("派系状态已修正。")
+
+    def _apply_mortal_capability(self) -> None:
+        label = self.mortal_combo.get()
+        fid = label.split("｜", 1)[0] if label else ""
+        if not fid:
+            self._status("先选一个人类阵营。")
+            return
+        report = self.ch.change_mortal_capability(fid, self.mortal_delta.get())
+        self.mortal_delta.set(0)
+        self._refresh()
+        self._render_finale()
+        self._status(
+            f"{report['阵营']} 合法能力 → {report['合法能力']}"
+            f"（累计 {report['累计修正']:+d}）"
+        )
+
+    def _sync_mortal_widgets(self) -> None:
+        parts = []
+        for st in self.ch.mortal.values():
+            delta = self.ch.mortal_capability_delta.get(st.faction_id, 0)
+            parts.append(
+                f"{st.zh} {st.capability['legal']}（{delta:+d}）"
+                if delta
+                else f"{st.zh} {st.capability['legal']}"
+            )
+        self.mortal_note.set(
+            "　".join(parts)
+            + "　—— 效果 = 能力 × 立场烈度 × 世界状态杠杆；每 ±1 就可能换一次议程。"
+        )
 
     # ------------------------------------------------------------------
 

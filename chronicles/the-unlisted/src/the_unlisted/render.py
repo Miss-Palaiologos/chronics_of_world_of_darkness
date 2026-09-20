@@ -825,6 +825,26 @@ def render_mortal(data: ChronicleData) -> str:
     L.append("| 幕 | 阶段 |\n| --- | --- |\n")
     for a in acts:
         L.append(f"| {a['id']} | {a['phase']} |\n")
+    levers = data.mortal.get("levers")
+    if levers:
+        L.append(f"\n---\n\n## 二之二、{levers.get('note', '世界状态杠杆')}\n\n")
+        L.append(
+            "> **行动效果 ＝ 立场烈度 × 能力 × 世界状态杠杆**\n\n"
+        )
+        L.append("| 杠杆 | 适用阵营 | 倍率 | 说明 |\n| --- | --- | --- | --- |\n")
+        for row in levers.get("rows", []):
+            who = "、".join(
+                "全体" if t == "*" else data.mortal_factions[t]["zh"]
+                for t in row.get("applies_to", [])
+            )
+            L.append(
+                f"| {row['when']} | {who} | ×{row['factor']} | {row['why']} |\n"
+            )
+        tie = data.mortal.get("tie_break")
+        if tie:
+            L.append(f"\n**{tie['zh']}**：{tie['rule']}\n\n")
+            if tie.get("suspense"):
+                L.append(f"{tie['suspense']}\n\n")
     L.append("\n---\n\n## 三、人物表\n\n")
     for c in data.mortal["characters"]:
         fac = data.mortal_factions[c["faction"]]["zh"] if c.get("faction") else "—"
@@ -988,6 +1008,27 @@ def render_props(data: ChronicleData) -> str:
             d = oc.get("delta", {})
             cells = " | ".join(_delta_cell(d.get(v, 0)) for v in WORLD_VARS)
             L.append(f"| **{oc['action']}** | {cells} | {oc['note']} |\n")
+        default_line = p.get("default_line")
+        if default_line:
+            var_zh = {
+                x["id"]: x["zh"]
+                for x in data.chronicle["world_state"]["variables"]
+            }
+            L.append("\n**默认世界线：每一幕档案本来在哪里**\n\n")
+            if p.get("default_line_note"):
+                L.append(f"{p['default_line_note']}\n\n")
+            L.append("| 幕 | 默认去向 | 世界影响 |\n| --- | --- | --- |\n")
+            for a in acts:
+                oid = default_line.get(a["id"])
+                opt = next((o for o in p["outcomes"] if o["id"] == oid), None)
+                if not opt:
+                    continue
+                d = opt.get("delta", {})
+                cells = (
+                    "　".join(f"{var_zh.get(k, k)} {v:+d}" for k, v in d.items())
+                    or "—"
+                )
+                L.append(f"| {a['id']} | **{opt['action']}** | {cells} |\n")
         L.append(f"\n**如果它消失**：{p['if_lost']}\n\n")
         L.append("---\n\n")
     if data.ambient_props:

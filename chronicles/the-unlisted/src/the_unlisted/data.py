@@ -143,6 +143,45 @@ class ChronicleData:
     def venue_of_room(self) -> dict[str, str]:
         return self.chronicle["venues"]["rooms"]
 
+    @property
+    def mortal_lever_rows(self) -> list[dict]:
+        """人类行动的世界状态杠杆表。数值只写在 mortal.json 里。"""
+        return self.mortal.get("levers", {}).get("rows", [])
+
+    @property
+    def mortal_tie_priority(self) -> dict[str, int]:
+        """平局时谁先拿到议程。数字越小越优先。"""
+        order = self.mortal.get("tie_break", {}).get("priority", [])
+        return {fid: i for i, fid in enumerate(order)}
+
+    @property
+    def archive_prop(self) -> dict:
+        for p in self.key_props:
+            if p["id"] == "trusteeship_archive":
+                return p
+        return {}
+
+    @property
+    def archive_options(self) -> list[dict]:
+        """托管档案的所有可能去向（含数值影响）。唯一真相来源是 props.json。"""
+        return self.archive_prop.get("outcomes", [])
+
+    @property
+    def archive_default_line(self) -> dict[str, str]:
+        """默认世界线：每一幕档案本来会在哪里。"""
+        return self.archive_prop.get("default_line", {})
+
+    def archive_label(self, value: str) -> str:
+        for opt in self.archive_options:
+            if opt["id"] == value:
+                return opt["action"]
+        for opt in self.chronicle["world_state"]["discrete"]["archive_location"][
+            "options"
+        ]:
+            if opt["id"] == value:
+                return opt["zh"]
+        return value
+
     def acts(self) -> list[dict]:
         return self.act_list
 

@@ -15,6 +15,7 @@ $py='..\..\.venv\Scripts\python.exe'
 & $py -m the_unlisted.cli verify
 & $py -m the_unlisted.cli run --profile normal --seed 5
 & $py -m the_unlisted.cli finale
+& $py -m the_unlisted.cli balance --profile normal
 ```
 
 需要图形界面时：
@@ -23,8 +24,8 @@ $py='..\..\.venv\Scripts\python.exe'
 & $py -m the_unlisted.cli gui
 ```
 
-图形界面分三个页签：「当前局面」显示当前场景描写、本幕变体与下一幕变体条件（红字为当前立即命中，点选条目可看玩家行为与难度）；「本场结算」分世界状态、血族变化、终局判定、结算明细四页；顶部常驻逃亡准备进度条。
-「自定义玩家行动」在本 GUI 的第三个页签中：把玩家模板切到 `custom`，再填写结果质量、修正池、目击次数、混乱与逃亡准备。
+图形界面分三个页签：「当前局面」显示当前场景描写、本幕变体与下一幕变体条件（红字为当前立即命中，点选条目可看玩家行为与难度）；「本场结算」分世界状态、血族变化、终局判定、结算明细四页；顶部常驻逃亡准备进度条与**托管档案当前去向**。
+「道具与手动修正」页有三块：**托管档案去向下拉框**（默认世界线，可手动改并计入影响）、**人类阵营合法能力修正**（密室交易的唯一直接杠杆，决定谁在议程上）、血族派系状态修正；「自定义玩家行动」同样在这一页：把玩家模板切到 `custom`，再填写结果质量、修正池、目击次数、混乱与逃亡准备。
 
 如果直接运行脚本，也可以使用：
 
@@ -46,6 +47,8 @@ $py='..\..\.venv\Scripts\python.exe'
 | `run --profile normal --seed 5` | 用预设玩家画像跑完整剧本 |
 | `finale` | 输出终局判定：谁在议程上、谁是替罪羊、那句话与事件定性 |
 | `finale --scene 4.1` | 只推进到 4.1 就做终局判定 |
+| `balance --profile normal` | 调试用：逐幕打印人类议程表与前两名差距 |
+| `advance --scene 5.1 --archive destroyed` | 结算前指定托管档案去向 |
 | `verify` | 回归验证四种画像的结局边界 |
 | `gui` | 打开本地图形化推演台 |
 

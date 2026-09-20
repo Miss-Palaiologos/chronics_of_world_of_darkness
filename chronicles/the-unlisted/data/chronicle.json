@@ -68,32 +68,37 @@
       }
     ],
     "discrete": {
-      "archive_location": {
-        "zh": "档案位置",
-        "initial": "joint_index",
-        "options": [
-          {
-            "id": "joint_index",
-            "zh": "联合系统索引"
-          },
-          {
-            "id": "huang",
-            "zh": "黄志远手上"
-          },
-          {
-            "id": "inquisition",
-            "zh": "已流向第二审判庭"
-          },
-          {
-            "id": "destroyed",
-            "zh": "已销毁"
-          },
-          {
-            "id": "public",
-            "zh": "已公开"
-          }
-        ]
-      },
+  "archive_location": {
+   "zh": "托管档案去向",
+   "initial": "tomb",
+   "source": "props.json 的 key_props[trusteeship_archive].outcomes 与 default_line 是唯一真相来源；这里的 options 只用于校验 id 是否同步。",
+   "options": [
+    {
+     "id": "tomb",
+     "zh": "留在墓室（未被取走）"
+    },
+    {
+     "id": "keep",
+     "zh": "保存（不公开也不销毁）"
+    },
+    {
+     "id": "victims_only",
+     "zh": "只交受害者名单给家属"
+    },
+    {
+     "id": "destroyed",
+     "zh": "销毁"
+    },
+    {
+     "id": "public",
+     "zh": "公开"
+    },
+    {
+     "id": "inquisition",
+     "zh": "交给第二审判庭"
+    }
+   ]
+  },
       "hunting_grounds": {
         "zh": "猎场状态",
         "states": [
