@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>《不在册者》· 局势看板</title>
+<style>
+:root { color-scheme: dark; font-family: Georgia, "Noto Serif SC", serif; }
+body { margin:0; background:#171414; color:#e8dfd2; }
+header { padding:36px max(5vw,24px); background:linear-gradient(120deg,#2d1919,#191414); }
+h1 { margin:0 0 8px; font-size:36px; }
+main { max-width:1180px; margin:auto; padding:28px 20px 60px; }
+.state, .acts { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+.card, .act { background:#221d1d; border:1px solid #463333; border-radius:12px; padding:16px; }
+.card strong { display:block; font-size:30px; color:#ffd28f; }
+.act h3 { margin:0 0 8px; color:#ffd28f; }
+table { width:100%; border-collapse:collapse; margin:18px 0 34px; }
+th, td { text-align:left; padding:9px; border-bottom:1px solid #463333; vertical-align:top; }
+th { color:#ffd28f; }
+code { background:#2d2727; padding:2px 6px; border-radius:5px; }
+</style>
+<header>
+  <h1>《不在册者》</h1>
+  <p>2040 · 新加坡 · VTM V5 现代之夜</p>
+  <p><code>python -m the_unlisted.cli run --profile normal --seed 5</code>　
+     <code>python -m the_unlisted.cli gui</code></p>
+</header>
+<main>
+  <h2>世界状态</h2><section class="state"><div class="card"><small>秩序</small><strong>8</strong></div><div class="card"><small>正当性</small><strong>7</strong></div><div class="card"><small>猎食条件</small><strong>5</strong></div><div class="card"><small>暴露度</small><strong>2</strong></div><div class="card"><small>资本信心</small><strong>8</strong></div></section>
+  <h2>六幕</h2><section class="acts"><article class="act"><h3>第 1 幕 · 静水</h3><p>在两个世界仍是常态的时候，第一次让《区域稳定托管行政记录》以合同引用的形式出现。</p><small>E1</small></article><article class="act"><h3>第 2 幕 · 火种与两百页</h3><p>一次死亡把街道变成守夜，一场听证把它变成管辖权和档案问题。</p><small>E2 / E3</small></article><article class="act"><h3>第 3 幕 · 讲台</h3><p>和平游行、政府妥协、无人机刺杀；运动在找不到凶手之后开始极端化。</p><small>E3T</small></article><article class="act"><h3>第 4 幕 · 计中计</h3><p>两支队伍自然汇入旧站台，特警与宪兵只差一轮尸体或火光。</p><small>E4</small></article><article class="act"><h3>第 5 幕 · 档案之夜</h3><p>五个血族派系在同一座墓前争夺托管档案，也第一次看见档案的主人。</p><small>E6</small></article><article class="act"><h3>第 6 幕 · 结算与拆除</h3><p>表决、替罪羊与拆除；所有前面没有结算的账在这里收束。</p><small>E7 / E8</small></article></section>
+  <h2>人类三方</h2>
+  <table><tr><th>阵营</th><th>立场</th></tr><tr><td>主权派</td><td>《过渡安排》必须在议会公开、交付表决；《南方架构》必须被公投否决；联合机构必须逐步拆解。</td></tr><tr><td>联盟派</td><td>承认现实。公开《过渡安排》，为它辩护，然后用《南方架构》把它变成一份双方都签了字的条约。</td></tr><tr><td>技术官僚派</td><td>不谈理念，谈可得性、可行性、可维持性。</td></tr></table>
+  <h2>血族五方</h2>
+  <table><tr><th>派系</th><th>年龄轴</th><th>派系轴</th><th>一句话</th></tr><tr><td>缄默庭</td><td>elder</td><td>camarilla</td><td>拖到所有人都老死</td></tr><tr><td>新血</td><td>young</td><td>camarilla</td><td>遵命，然后偷偷看着朋友被碾</td></tr><tr><td>旧自由邦</td><td>elder</td><td>anarch</td><td>最『爱国』的一群，出于最纯粹的自利</td></tr><tr><td>街垒</td><td>young</td><td>anarch</td><td>他们真的相信。这才是问题。</td></tr><tr><td>狂信团</td><td>young</td><td>sabbat</td><td>最自由的名号，最不可改变的狂热</td></tr></table>
+</main>
+</html>
