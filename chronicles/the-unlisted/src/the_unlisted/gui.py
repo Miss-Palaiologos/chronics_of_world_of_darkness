@@ -783,6 +783,31 @@ class ChronicleGui:
         )
         for para in scene.get("scene", []):
             self.home_scene.insert("end", para + "\n\n")
+        notes = scene.get("cast_notes") or {}
+        rows = notes.get("rows") or []
+        if rows:
+            self.home_scene.insert(
+                "end", "人物与背景备注（玩家问什么，他们怎么答）\n\n"
+            )
+            for e in rows:
+                cid = e.get("id")
+                name = self.data.name_of(cid) if cid else e.get("who", "")
+                meta = "　·　".join(
+                    t for t in (e.get("role"), e.get("where")) if t
+                )
+                line = f"【{name}】"
+                if meta:
+                    line += f"　{meta}"
+                if e.get("when"):
+                    line += f"　（{e['when']}）"
+                self.home_scene.insert("end", line + "\n")
+                for pair in e.get("qa") or []:
+                    self.home_scene.insert(
+                        "end", f"　问：{pair['q']}\n　答：{pair['a']}\n"
+                    )
+                if e.get("tip"):
+                    self.home_scene.insert("end", f"　提示：{e['tip']}\n")
+                self.home_scene.insert("end", "\n")
         if scene.get("hook"):
             self.home_scene.insert("end", f"钩子：{scene['hook']}\n")
 

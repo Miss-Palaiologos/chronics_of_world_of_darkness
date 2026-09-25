@@ -34,7 +34,7 @@ This repository is a **collection**, not a single scenario. Each chronicle lives
 
 | Chronicle / 编年史 | Folder / 目录 | Version / 版本 | Status / 状态 |
 | --- | --- | --- | --- |
-| **The Unlisted / 《不在册者》** | `chronicles/the-unlisted/` | `1.0.7` | Public draft / 公开初稿 |
+| **The Unlisted / 《不在册者》** | `chronicles/the-unlisted/` | `1.0.9` | Public draft / 公开初稿 |
 
 ## Quick Start / 快速开始
 

@@ -27,6 +27,44 @@ def _w(path: Path, text: str) -> Path:
     return path
 
 
+def _cast_name(data: ChronicleData, entry: dict) -> str:
+    """备注条目的显示名：有 id 就跟人表同步，没有 id 就用写死的称呼。"""
+    cid = entry.get("id")
+    if cid in data.kindred_chars:
+        return data.kindred_chars[cid]["zh"]
+    if cid in data.mortal_chars:
+        return data.mortal_chars[cid]["zh"]
+    return entry.get("who", "")
+
+
+def render_cast_notes(scene: dict, data: ChronicleData, level: str = "###") -> str:
+    """场景级人物与背景备注：玩家问什么，他们就怎么答。"""
+    notes = scene.get("cast_notes") or {}
+    rows = notes.get("rows") or []
+    if not rows:
+        return ""
+    L: list[str] = [f"{level} 人物与背景备注（玩家问什么，他们怎么答）\n\n"]
+    if notes.get("note"):
+        L.append(f"> {notes['note']}\n\n")
+    for e in rows:
+        head = f"**{_cast_name(data, e)}**"
+        meta = "　·　".join(t for t in (e.get("role"), e.get("where")) if t)
+        if meta:
+            head += f"　{meta}"
+        if e.get("when"):
+            head += f"　（{e['when']}）"
+        L.append(head + "\n\n")
+        qa = e.get("qa") or []
+        if qa:
+            L.append("| 玩家可能问 | 对方怎么答 |\n| --- | --- |\n")
+            for pair in qa:
+                L.append(f"| {pair['q']} | {pair['a']} |\n")
+            L.append("\n")
+        if e.get("tip"):
+            L.append(f"**提示**：{e['tip']}\n\n")
+    return "".join(L)
+
+
 def _stance_zh(data: ChronicleData, sid: str) -> str:
     return data.chronicle["elysium"].get("_stance", {}).get(sid, sid)
 
@@ -329,6 +367,7 @@ def render_act(
         L.append("*可直接朗读。段落之间留白，不要一口气念完。*\n\n")
         for para in act.get("scene", []):
             L.append(f"{para}\n\n")
+        L.append(render_cast_notes(act, data, "###"))
     present = {
         e["prop"]: e
         for e in act.get("props_in_scene", [])
@@ -682,6 +721,17 @@ def render_kindred(data: ChronicleData) -> str:
         )
     L.append("\n")
 
+    an = data.kindred.get("archive_note")
+    if an:
+        L.append(f"### {an['zh']}\n\n")
+        L.append(f"{an['text']}\n\n")
+        L.append("| 派系 | 对托管档案的诉求 |\n| --- | --- |\n")
+        for f in data.kindred["factions"]:
+            st = f.get("archive_stake")
+            if st:
+                L.append(f"| **{f['zh']}** | {st['zh']} |\n")
+        L.append("\n")
+
     L.append("## 二、派系详表\n\n")
     for f in data.kindred["factions"]:
         init = f["initial"]
@@ -693,6 +743,11 @@ def render_kindred(data: ChronicleData) -> str:
         L.append(f"**不愿承认**：{f['unwilling_to_admit']}\n\n")
         L.append(f"**行动方式**：{f['method']}\n\n")
         L.append(f"**托管三年留下的旧账**：{f['trusteeship_debt']}\n\n")
+        st = f.get("archive_stake")
+        if st:
+            L.append(f"**要这份档案来做什么**：{st['zh']}\n\n")
+            L.append(f"**为什么**：{st['why']}\n\n")
+            L.append(f"**打算怎么用**：{st['use']}\n\n")
         L.append(
             f"**初始**：立场 {STANCE_ZH.get(init['stance'], init['stance'])}"
             f"　耐心 {init['patience']}　能力 {init['capability']}\n\n"
@@ -1457,6 +1512,7 @@ def render_all(data_dir: Path | str | None = None) -> list[Path]:
             parts.append("*可直接朗读。段落之间留白，不要一口气念完。*\n\n")
             for para in s.get("scene", []):
                 parts.append(f"{para}\n\n")
+            parts.append(render_cast_notes(s, data, "###"))
             body = render_act(data, s, include_header=False, include_scene=False)
             parts.append(body)
             content = "".join(parts)
@@ -1479,6 +1535,7 @@ def render_all(data_dir: Path | str | None = None) -> list[Path]:
                 )
                 for para in s.get("scene", []):
                     parts.append(f"{para}\n\n")
+                parts.append(render_cast_notes(s, data, "####"))
             # 其余小节：逐场，但去掉各自的结算
             for i, s in enumerate(scenes, 1):
                 parts.append(

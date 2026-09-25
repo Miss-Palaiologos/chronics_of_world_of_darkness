@@ -1,5 +1,35 @@
 # Changelog / 版本记录
 
+## [1.0.9] - 2026-09-25
+
+### English
+
+- **Each kindred faction now has a concrete, different use for the trusteeship archive.** The archive is written as a bound volume of three things: a kindred census (who was written down, who never was), a domain-and-hunting-ground allocation table, and a signature chain. Humans want the third; kindred want the first two. The five stakes are: the Silent Court destroys the whole thing (Masquerade), the New Blood read the real population (advancement), the Old Free State reads the power map (the coming redistribution), the Barricade reads the young-kindred count (organisation), and the Zealots just want a few clean names to hand to the Second Inquisition (chaos). Added as `archive_stake` to every faction in `data/kindred.json`, rendered in `roster.md`, and summarised in `docs/system.md`.
+- **Lin Yongan's torpor is now a seven-year cycle, three nights at a time.** He is woken to judge, sign, and confirm who holds what, and each waking has to be fed. That is why the Camarilla still holds the top of the city — every main actor of the last seventy years first passed his seal — and why the elders can afford to destroy the file at all. Scene 5.1's premise, tomb description, knowledge table, arrival table, intents, threat line, and the appendix's "who wants the archive" list were all updated to match ("I'll wake him early" instead of "I'll wake him").
+- The Second Inquisition's model now detects a seven-year rhythm rather than a vague eighty-year anomaly.
+
+### 中文
+
+- **五个血族派系现在各有各的诉求，而且用途互不相同。** 档案被明确写成三样东西的合订本：血族人口登记（谁被写下、谁从来没有）、领地与猎场分配表、一条需要定期重签的签字链。人类要第三样，血族要前两样。五个诉求是：缄默庭整份销毁（避世戒律）、新血读真实人口（上升）、旧自由邦读权力地图（重组）、街垒读年轻血族统计（组织）、狂信团只要几个名字送给第二审判庭（混乱）。以 `archive_stake` 写进 `data/kindred.json`，在 `roster.md` 输出，并在 `docs/system.md` 汇总。
+- **林永安的休眠改为七年一个周期、一次三夜。** 他每次被叫醒是为了裁决、签字、确认谁管哪块地，而每一次醒期都要血喂。这才是秘盟仍握着最高权力的原因：七十年里四任实质主事人，每一任都先过了他的印；也是他们敢销毁档案的原因。第五幕的前提、墓室描写、知情表、到场表、各方意图、威胁台词，以及附录「谁想要那份档案」全部同步改写（台词从「我就叫他」改为「我就提前叫他」）。
+- 第二审判庭的模型现在读出的是**七年一次的周期**，而不是一个笼统的八十年异常。
+
+## [1.0.8] - 2026-09-25
+
+### English
+
+- Added per-scene **cast and background notes** to all eight scenes. Every scene now lists the people and background groups that can appear (servers, guests, mourners, marchers, police, cemetery passers-by, the crowd outside parliament, demolition workers, and the like) with the questions players are likely to ask and the answer each of them gives, plus a storyteller tip.
+- Added **paragraph-shift cues** to the read-aloud scene text. Scenes made of several paragraphs now close each beat with a sentence that signals the next shift of time, place, or focus, so the storyteller can hand the table a transition without stopping.
+- The renderer emits these notes as a new 「人物与背景备注（玩家问什么，他们怎么答）」 section right after each scene text; the GUI's current-scene pane shows the same notes.
+- Fixed a stray space in the act 1 scene text (「道格 站在最外围」→「道格站在最外围」).
+
+### 中文
+
+- 为全部八个场景补上**人物与背景备注**：逐条列出可能出现在本场的人物与背景群体（服务生、酒会宾客、守夜群众、游行队伍、警察、义山的路人与杂役、议会外的人群、拆除工人等），给出玩家可能问什么、他们会怎么答，以及说书人提示。
+- 为可直接朗读的场景正文补上**段落转场提示**：由多个段落构成的场景，现在会在每一段收束处留一句指向下一段时间、地点或视角的描写，说书人不必停顿找话头。
+- 生成器在每场场景描写之后输出新的「人物与背景备注（玩家问什么，他们怎么答）」小节；界面「当前局面」页同步显示这些备注。
+- 修正第一幕正文里的一处多余空格（「道格 站在最外围」→「道格站在最外围」）。
+
 ## [1.0.7] - 2026-09-20
 
 ### English

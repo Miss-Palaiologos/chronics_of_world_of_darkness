@@ -31,6 +31,6 @@ uv run the-unlisted balance --profile normal
 
 ## Version / 版本
 
-Current release: **1.0.7**
+Current release: **1.0.9**
 
-当前版本：**1.0.7**
+当前版本：**1.0.9**
